@@ -150,9 +150,7 @@
       <p class="mb-0">
         Select ingredients on the left. The burger updates using your <b>burger-layers</b> images and auto-rotates.
       </p>
-      <small class="d-block mt-2" style="opacity:.75;">
-        Note: This is a “2.5D” 3D stack made from PNG layers. A photoreal result like your reference image requires a real 3D model (GLB).
-      </small>
+
     </div>
 
     <div class="builder-wrap row g-0">
@@ -181,9 +179,6 @@
 
           <button id="build-burger-button" class="btn btn-primary w-100">Build My Burger!</button>
 
-          <small class="d-block mt-3" style="opacity:.8;">
-            If layers don’t show, GitHub Pages is case-sensitive. This script will tell you the exact missing file path.
-          </small>
         </div>
       </div>
 
@@ -281,22 +276,22 @@
 
     // Your existing image paths (MUST match repo exactly: folder + filename casing)
     const IMG = {
-      bun_bottom: "burger-layers/bun-bottom.png",
-      bun_top: "burger-layers/bun-top.png",
-      wrap_bottom: "burger-layers/lettuce-wrap-bottom.png",
-      wrap_top: "burger-layers/lettuce-wrap-top.png",
+      bun_bottom: "bun-bottom.png",
+      bun_top: "bun-top.png",
+      wrap_bottom: "lettuce-wrap-bottom.png",
+      wrap_top: "lettuce-wrap-top.png",
 
-      patty_beef: "burger-layers/patty-beef.png",
-      patty_chicken: "burger-layers/patty-chicken.png",
-      patty_veggie: "burger-layers/patty-veggie.png",
+      patty_beef: "patty-beef.png",
+      patty_chicken: "patty-chicken.png",
+      patty_veggie: "patty-veggie.png",
 
-      cheese_american: "burger-layers/cheese-american.png",
-      cheese_cheddar: "burger-layers/cheese-cheddar.png",
-      cheese_swiss: "burger-layers/cheese-swiss.png",
+      cheese_american: "cheese-american.png",
+      cheese_cheddar: "cheese-cheddar.png",
+      cheese_swiss: "cheese-swiss.png",
 
-      topping_lettuce: "burger-layers/topping-lettuce.png",
-      topping_tomato: "burger-layers/topping-tomato.png",
-      topping_onions: "burger-layers/topping-onions.png"
+      topping_lettuce: "topping-lettuce.png",
+      topping_tomato: "topping-tomato.png",
+      topping_onions: "topping-onions.png"
     };
 
     function configToStackKeys(cfg) {
@@ -534,6 +529,7 @@
   </script>
 </body>
 </html>
+
 
 
 
