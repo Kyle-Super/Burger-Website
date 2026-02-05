@@ -34,7 +34,6 @@
     .builder-panel h4 { margin: 14px 0 8px; font-size: 1.05rem; }
     .builder-panel label { display:block; margin:6px 0; cursor:pointer; user-select:none; }
 
-    /* Stage */
     .stage-wrap {
       position: relative;
       height: 560px;
@@ -56,7 +55,6 @@
       border-radius:10px;
       pointer-events:none;
     }
-
     .stage-badge {
       position:absolute; right:12px; top:12px;
       font-size:12px; opacity:0.9;
@@ -69,7 +67,6 @@
       max-width:70%;
       text-align:right;
     }
-
     .stage-error {
       padding: 16px;
       color: #7a0012;
@@ -80,7 +77,6 @@
       font-size: 14px;
       line-height: 1.4;
     }
-
     #burger-recipe-output {
       margin-top: 18px;
       padding: 14px;
@@ -88,7 +84,6 @@
       border: 1px solid rgba(0,0,0,0.12);
       background: rgba(255,255,255,0.96);
     }
-
     #build-burger-button { margin-top: 14px; font-weight: 700; }
 
     code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 6px; }
@@ -114,7 +109,7 @@
     <div class="text-center my-4">
       <h2>Interactive Burger Builder (3D Model)</h2>
       <p class="mb-0">
-        This version uses a real 3D model (<code>models/burger.glb</code>) and toggles ingredients by mesh name.
+        Loads a real 3D model from <code>models/burger.glb</code> and toggles ingredients by mesh name.
       </p>
     </div>
 
@@ -142,10 +137,10 @@
           <label><input type="checkbox" name="topping" value="tomato"> Fresh Tomato</label>
           <label><input type="checkbox" name="topping" value="onions"> Raw Onions</label>
 
+          <!-- Important: non-submit -->
           <button id="build-burger-button" type="button" class="btn btn-primary w-100">
             Build My Burger!
           </button>
-
         </div>
       </div>
 
@@ -167,25 +162,12 @@
       <b>Your build summary will appear here.</b><br />
       Choose ingredients, then click “Build My Burger!”.
     </div>
-
-    <hr />
-
-    <h2 class="text-center">Our Favorite Recipe Video</h2>
-    <div class="video-container">
-      <iframe width="560" height="315"
-        src="https://www.youtube.com/embed/mwExFzKorws?si=Hy-q9s671xEPOBfs"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-      </iframe>
-    </div>
   </main>
 
   <footer>
     <p>© 2025 Ultimate Burger Guide</p>
   </footer>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Google Translate (safe init) -->
@@ -198,21 +180,65 @@
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- Three.js (module build for GLTFLoader) -->
+  <!-- =========================================
+       SUMMARY SCRIPT (NON-MODULE, ALWAYS WORKS)
+       ========================================= -->
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const buildBtn = document.getElementById("build-burger-button");
+      const outputEl = document.getElementById("burger-recipe-output");
+
+      const LABEL = {
+        bun: { brioche: "Brioche Bun", sesame: "Sesame Seed Bun", "lettuce-wrap": "Lettuce Wrap" },
+        patty: { beef: "Beef Patty", chicken: "Grilled Chicken", veggie: "Veggie Patty" },
+        cheese: { american: "American Cheese", cheddar: "Sharp Cheddar", swiss: "Swiss Cheese" },
+        topping: { lettuce: "Crisp Lettuce", tomato: "Fresh Tomato", onions: "Raw Onions" }
+      };
+
+      function getRadioValue(name) {
+        const checked = document.querySelector(`input[name="${name}"]:checked`);
+        return checked ? checked.value : null;
+      }
+      function getCheckedValues(name) {
+        return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x => x.value);
+      }
+
+      buildBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const cfg = {
+          bun: getRadioValue("bun"),
+          patty: getRadioValue("patty"),
+          cheese: getCheckedValues("cheese"),
+          topping: getCheckedValues("topping")
+        };
+
+        const bunText = LABEL.bun[cfg.bun] || cfg.bun || "—";
+        const pattyText = LABEL.patty[cfg.patty] || cfg.patty || "—";
+        const cheeseText = cfg.cheese.length ? cfg.cheese.map(c => LABEL.cheese[c] || c).join(", ") : "None";
+        const toppingText = cfg.topping.length ? cfg.topping.map(t => LABEL.topping[t] || t).join(", ") : "None";
+
+        outputEl.innerHTML =
+          `<b>Your Burger Build:</b><br>` +
+          `• Bun: ${bunText}<br>` +
+          `• Patty: ${pattyText}<br>` +
+          `• Cheese: ${cheeseText}<br>` +
+          `• Toppings: ${toppingText}`;
+      });
+    });
+  </script>
+
+  <!-- =========================================
+       3D MODEL VIEWER (MODULE)
+       ========================================= -->
   <script type="module">
     import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
     import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
     import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
 
-    // ----------------------------
-    // DOM + form helpers
-    // ----------------------------
     const stageEl = document.getElementById("threeStage");
     const builderEl = document.getElementById("burger-builder");
-    const buildBtn = document.getElementById("build-burger-button");
-    const outputEl = document.getElementById("burger-recipe-output");
     const stageStatus = document.getElementById("stageStatus");
-
     function setStatus(t) { stageStatus.textContent = "Status: " + t; }
 
     function getRadioValue(name) {
@@ -231,17 +257,7 @@
       };
     }
 
-    const LABEL = {
-      bun: { brioche: "Brioche Bun", sesame: "Sesame Seed Bun", "lettuce-wrap": "Lettuce Wrap" },
-      patty: { beef: "Beef Patty", chicken: "Grilled Chicken", veggie: "Veggie Patty" },
-      cheese: { american: "American Cheese", cheddar: "Sharp Cheddar", swiss: "Swiss Cheese" },
-      topping: { lettuce: "Crisp Lettuce", tomato: "Fresh Tomato", onions: "Raw Onions" }
-    };
-
-    // ----------------------------
-    // IMPORTANT: mesh-name mapping
-    // If your GLB uses different names, change them here.
-    // ----------------------------
+    // Mesh-name mapping (edit if your GLB uses different names)
     const MESH = {
       bun: {
         brioche: ["bun_brioche_top", "bun_brioche_bottom"],
@@ -265,9 +281,6 @@
       }
     };
 
-    // ----------------------------
-    // Scene setup
-    // ----------------------------
     setStatus("Creating scene…");
     stageEl.innerHTML = "";
 
@@ -281,7 +294,6 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     stageEl.appendChild(renderer.domElement);
 
-    // Lights for “product render” feel
     scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
     const key = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -292,7 +304,6 @@
     fill.position.set(-6, 4, -6);
     scene.add(fill);
 
-    // Ground
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 40),
       new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
@@ -301,18 +312,15 @@
     ground.position.y = 0;
     scene.add(ground);
 
-    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.enablePan = false;
     controls.target.set(0, 1.2, 0);
 
-    // Model root
     const modelRoot = new THREE.Group();
     modelRoot.position.set(0, 0.2, 0);
     scene.add(modelRoot);
 
-    // Resize
     function onResize() {
       const rect = stageEl.getBoundingClientRect();
       const w = Math.max(1, Math.floor(rect.width));
@@ -322,20 +330,14 @@
       camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", onResize);
+    onResize();
 
-    // ----------------------------
-    // Load GLB + build lookup table
-    // ----------------------------
     const loader = new GLTFLoader();
-
-    // Mesh lookup: name -> object3D
     const byName = new Map();
 
     function indexModel(object3D) {
       byName.clear();
-      object3D.traverse((obj) => {
-        if (obj && obj.name) byName.set(obj.name, obj);
-      });
+      object3D.traverse((obj) => { if (obj && obj.name) byName.set(obj.name, obj); });
     }
 
     function setVisible(names, visible) {
@@ -345,43 +347,19 @@
       }
     }
 
-    // Hide everything ingredient-related first (so we can turn on what we need)
     function hideAllIngredients() {
-      // buns
       for (const k of Object.keys(MESH.bun)) setVisible(MESH.bun[k], false);
-      // patties
       for (const k of Object.keys(MESH.patty)) setVisible(MESH.patty[k], false);
-      // cheeses
       for (const k of Object.keys(MESH.cheese)) setVisible(MESH.cheese[k], false);
-      // toppings
       for (const k of Object.keys(MESH.topping)) setVisible(MESH.topping[k], false);
     }
 
     function applySelectionToModel(cfg) {
-      // buns/patty: one-of
       hideAllIngredients();
-
-      // show chosen bun + patty
       setVisible(MESH.bun[cfg.bun] || [], true);
       setVisible(MESH.patty[cfg.patty] || [], true);
-
-      // cheese/toppings: many-of
       for (const c of cfg.cheese) setVisible(MESH.cheese[c] || [], true);
       for (const t of cfg.topping) setVisible(MESH.topping[t] || [], true);
-    }
-
-    // Helpful error if mesh names don’t match
-    function missingMeshReport() {
-      const missing = [];
-      const allGroups = [MESH.bun, MESH.patty, MESH.cheese, MESH.topping];
-      for (const group of allGroups) {
-        for (const key of Object.keys(group)) {
-          for (const name of group[key]) {
-            if (!byName.has(name)) missing.push(name);
-          }
-        }
-      }
-      return missing;
     }
 
     setStatus("Loading burger.glb…");
@@ -392,28 +370,11 @@
         modelRoot.clear();
         modelRoot.add(gltf.scene);
 
-        // Index meshes by name
         indexModel(gltf.scene);
-
-        // Optional: scale/center if your model is huge/off-center
-        // You can tweak this if needed.
-        // modelRoot.scale.setScalar(1.0);
-
-        // Validate mesh names
-        const missing = missingMeshReport();
-        if (missing.length) {
-          // Don’t fail; just warn visibly.
-          setStatus("Mesh names mismatch");
-          console.warn("Missing meshes:", missing);
-        } else {
-          setStatus("Ready");
-        }
-
-        // Apply default selection
         applySelectionToModel(getConfig());
-
-        // Resize after model is in DOM
         onResize();
+
+        setStatus("Ready");
       },
       undefined,
       (err) => {
@@ -422,52 +383,19 @@
         stageEl.innerHTML = `
           <div class="stage-error">
             <b>Could not load <code>models/burger.glb</code></b><br>
-            Make sure the file exists in your repo at <code>/models/burger.glb</code> and is committed/pushed.<br><br>
-            If you renamed the folder/file, update the path in this code.
+            Make sure the file exists at <code>/models/burger.glb</code> and is committed.
           </div>`;
       }
     );
 
-    // ----------------------------
-    // Live updates (toggle meshes)
-    // ----------------------------
-    builderEl.addEventListener("change", () => {
-      const cfg = getConfig();
-      applySelectionToModel(cfg);
-    });
+    builderEl.addEventListener("change", () => applySelectionToModel(getConfig()));
 
-    // ----------------------------
-    // Summary button (works)
-    // ----------------------------
-    buildBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      const cfg = getConfig();
-
-      const bunText = LABEL.bun[cfg.bun] || cfg.bun || "—";
-      const pattyText = LABEL.patty[cfg.patty] || cfg.patty || "—";
-      const cheeseText = cfg.cheese.length ? cfg.cheese.map(c => LABEL.cheese[c] || c).join(", ") : "None";
-      const toppingText = cfg.topping.length ? cfg.topping.map(t => LABEL.topping[t] || t).join(", ") : "None";
-
-      outputEl.innerHTML =
-        `<b>Your Burger Build:</b><br>` +
-        `• Bun: ${bunText}<br>` +
-        `• Patty: ${pattyText}<br>` +
-        `• Cheese: ${cheeseText}<br>` +
-        `• Toppings: ${toppingText}`;
-    });
-
-    // ----------------------------
-    // Animate (auto-rotate model root)
-    // ----------------------------
     function animate() {
       requestAnimationFrame(animate);
-
-      modelRoot.rotation.y += 0.008; // auto-rotate
+      modelRoot.rotation.y += 0.008;
       controls.update();
       renderer.render(scene, camera);
     }
-
-    onResize();
     animate();
   </script>
 </body>
