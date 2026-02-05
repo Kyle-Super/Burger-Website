@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Burger Battles</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/Style.css">
+        
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'light') {
+                document.documentElement.className = 'light-mode';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <header id="main-header">
+        <h1>Ultimate Burger Guide</h1>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="city_burgers.html">Best Burgers by City</a>
+        <a href="recipe_cards.html">Recipe Cards</a>
+        <a href="make_your_own.html">Make Your Own</a>
+        <a href="burger_battles.html">Burger Battles</a>
+        <a href="submit.html">Submit Your Pick</a>
+        <a href="about.html">About</a>
+    </nav>
+    <main class="battle-page-main">
+        <div class="battle-intro">
+            <h2>Burger Battles: A Clash of Titans</h2>
+            <p>In the world of burgers, legends are born. We pit iconic styles against each other in a head-to-head showdown to see who reigns supreme.</p>
+        </div>
+
+        <!-- BATTLE 1: SMASH VS GOURMET -->
+        <section class="battle-arena row g-0">
+            <div class="col-md-6 burger-contender left" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/smash-burger-1.jpg');">
+                <div class="contender-card">
+                    <h3 class="contender-title">The Scrappy<br><span>Smash Burger</span></h3>
+                    <ul class="contender-ingredients">
+                        <li>80/20 Ground Beef</li>
+                        <li>Soft Potato or Brioche Bun</li>
+                        <li>American Cheese</li>
+                        <li>Thinly Sliced Onions & Pickles</li>
+                    </ul>
+                    <div class="contender-stats">
+                        <div class="stat-item">
+                            <span>Taste: <strong>Savory & Intense</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%;"></div></div>
+                        </div>
+                        <div class="stat-item">
+                            <span>Cook Time: <strong>12min</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 20%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vs-circle d-none d-md-flex">VS</div>
+
+            <div class="col-md-6 burger-contender right winner" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/gourmet-burger-1.jpg');">
+                <div class="contender-card">
+                    <div class="winner-banner">Winner!</div>
+                    <h3 class="contender-title">The Luxurious<br><span>Gourmet Burger</span></h3>
+                    <ul class="contender-ingredients">
+                        <li>Sirloin or Chuck</li>
+                        <li>Artisanal Brioche Bun</li>
+                        <li>Aged Cheddar or Gruyère</li>
+                        <li>Bacon Jam or Truffle Aioli</li>
+                    </ul>
+                    <div class="contender-stats">
+                        <div class="stat-item">
+                            <span>Taste: <strong>Rich & Complex</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 95%;"></div></div>
+                        </div>
+                        <div class="stat-item">
+                            <span>Cook Time: <strong>35min</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 80%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BATTLE 2: OKLAHOMA vs. JUICY LUCY -->
+        <section class="battle-arena row g-0">
+            <div class="col-md-6 burger-contender left winner" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/oklahoma-burger.jpg');">
+                <div class="contender-card">
+                    <div class="winner-banner">Winner!</div>
+                    <h3 class="contender-title">Oklahoma<br><span>Fried Onion Burger</span></h3>
+                    <ul class="contender-ingredients">
+                        <li>Ground Beef Ball</li>
+                        <li>Heaping Pile of Thin Onions</li>
+                        <li>American Cheese</li>
+                        <li>Simple Steamed Bun</li>
+                    </ul>
+                    <div class="contender-stats">
+                        <div class="stat-item">
+                            <span>Taste: <strong>Sweet & Savory</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 94%;"></div></div>
+                        </div>
+                        <div class="stat-item">
+                            <span>Cook Time: <strong>15min</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 30%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vs-circle d-none d-md-flex">VS</div>
+
+            <div class="col-md-6 burger-contender right" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/juicy-lucy.jpg');">
+                <div class="contender-card">
+                    <h3 class="contender-title">Minnesota<br><span>Juicy Lucy</span></h3>
+                    <ul class="contender-ingredients">
+                        <li>Two Thin Beef Patties</li>
+                        <li>Molten American Cheese (inside)</li>
+                        <li>Sturdy, Plain Bun</li>
+                        <li>Pickles (optional)</li>
+                    </ul>
+                    <div class="contender-stats">
+                        <div class="stat-item">
+                            <span>Taste: <strong>Ultimate Cheese</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 91%;"></div></div>
+                        </div>
+                        <div class="stat-item">
+                            <span>Cook Time: <strong>22min</strong></span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 65%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+
+    </main>
+    <footer>
+        <p>© 2025 Ultimate Burger Guide</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/scripts.js"></script>
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+            {pageLanguage: 'en'},
+            'google_translate_element'
+        );
+    }
+    </script>
+
+    <div id="google_translate_element" style="display: none;"></div>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        function initializeTranslation() {
+            const checkTranslate = setInterval(() => {
+                const select = document.querySelector('select.goog-te-combo');
+                if (select) {
+                    clearInterval(checkTranslate);
+                    const savedLang = localStorage.getItem('userLanguage') || 'en';
+                    changeLanguage(savedLang);
+                }
+            }, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeTranslation);
+
+        function changeLanguage(lang) {
+            if (window.google && window.google.translate) {
+                const select = document.querySelector('select.goog-te-combo');
+                if (select) {
+                    select.value = lang;
+                    select.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

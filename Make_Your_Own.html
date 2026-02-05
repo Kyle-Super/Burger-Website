@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Make Your Own Burger</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/Style.css">
+    
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'light') {
+                document.documentElement.className = 'light-mode';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <header id="main-header">
+        <h1>Ultimate Burger Guide</h1>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="city_burgers.html">Best Burgers by City</a>
+        <a href="recipe_cards.html">Recipe Cards</a>
+        <a href="make_your_own.html">Make Your Own</a>
+        <a href="burger_battles.html">Burger Battles</a>
+        <a href="submit.html">Submit Your Pick</a>
+        <a href="about.html">About</a>
+    </nav>
+    <main class="container">
+        <div class="text-center">
+            <h2>Interactive Burger Builder</h2>
+            <p>Select your ingredients from the panel on the left and watch your creation come to life on the right! When you're done, hit "Build My Burger" for a summary.</p>
+        </div>
+        
+        <div class="simulation-wrapper row align-items-center g-4">
+            <!-- Left Column: Ingredient Controls -->
+            <div id="burger-builder" class="burger-controls col-lg-5">
+                
+                <h4>1. Pick a Bun (Required)</h4>
+                <label><input type="radio" name="bun" value="brioche" checked> Brioche Bun</label>
+                <label><input type="radio" name="bun" value="sesame"> Sesame Seed Bun</label>
+                <label><input type="radio" name="bun" value="lettuce-wrap"> Lettuce Wrap</label>
+            
+                <h4>2. Pick a Patty (Required)</h4>
+                <label><input type="radio" name="patty" value="beef" checked> Beef Patty</label>
+                <label><input type="radio" name="patty" value="chicken"> Grilled Chicken</label>
+                <label><input type="radio" name="patty" value="veggie"> Veggie Patty</label>
+                
+                <h4>3. Add Cheese (Optional)</h4>
+                <label><input type="checkbox" name="cheese" value="american"> American Cheese</label>
+                <label><input type="checkbox" name="cheese" value="cheddar"> Sharp Cheddar</label>
+                <label><input type="checkbox" name="cheese" value="swiss"> Swiss Cheese</label>
+
+                <h4>4. Add Toppings (Optional)</h4>
+                <label><input type="checkbox" name="topping" value="lettuce"> Crisp Lettuce</label>
+                <label><input type="checkbox" name="topping" value="tomato"> Fresh Tomato</label>
+                <label><input type="checkbox" name="topping" value="onions"> Raw Onions</label>
+
+                <button id="build-burger-button" class="btn btn-primary w-100">Build My Burger!</button>
+            </div>
+
+            <!-- Right Column: Burger Visual Stage -->
+            <div class="burger-stage col-lg-7">
+                <img id="layer-bun-bottom" src="images/burger-layers/bun-bottom.png" alt="">
+                <img id="layer-lettuce-wrap-bottom" src="images/burger-layers/lettuce-wrap-bottom.png" alt="">
+                
+                <img id="layer-beef" src="images/burger-layers/patty-beef.png" alt="">
+                <img id="layer-chicken" src="images/burger-layers/patty-chicken.png" alt="">
+                <img id="layer-veggie" src="images/burger-layers/patty-veggie.png" alt="">
+                
+                <img id="layer-american" src="images/burger-layers/cheese-american.png" alt="">
+                <img id="layer-cheddar" src="images/burger-layers/cheese-cheddar.png" alt="">
+                <img id="layer-swiss" src="images/burger-layers/cheese-swiss.png" alt="">
+                
+                <img id="layer-onions" src="images/burger-layers/topping-onions.png" alt="">
+                <img id="layer-tomato" src="images/burger-layers/topping-tomato.png" alt="">
+                <img id="layer-lettuce" src="images/burger-layers/topping-lettuce.png" alt="">
+                
+                <img id="layer-bun-top" src="images/burger-layers/bun-top.png" alt="">
+                <img id="layer-lettuce-wrap-top" src="images/burger-layers/lettuce-wrap-top.png" alt="">
+            </div>
+        </div>
+
+        <div id="burger-recipe-output" aria-live="polite">
+            <!-- The text recipe summary will be generated here -->
+        </div>
+
+        <hr>
+
+        <h2 class="text-center">Our Favorite Recipe Video</h2>
+        <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/mwExFzKorws?si=Hy-q9s671xEPOBfs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+    </main>
+    <footer>
+        <p>© 2025 Ultimate Burger Guide</p>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/scripts.js"></script>
+    
+    <div id="google_translate_element" style="display: none;"></div>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        function initializeTranslation() {
+            const checkTranslate = setInterval(() => {
+                const select = document.querySelector('select.goog-te-combo');
+                if (select) {
+                    clearInterval(checkTranslate);
+                    const savedLang = localStorage.getItem('userLanguage') || 'en';
+                    changeLanguage(savedLang);
+                }
+            }, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeTranslation);
+
+        function changeLanguage(lang) {
+            if (window.google && window.google.translate) {
+                const select = document.querySelector('select.goog-te-combo');
+                if (select) {
+                    select.value = lang;
+                    select.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
