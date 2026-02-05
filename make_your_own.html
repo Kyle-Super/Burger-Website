@@ -5,9 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Your site CSS (keep this file name exactly as in your repo) -->
   <link rel="stylesheet" href="Style.css" />
 
+  <!-- Keep your theme preference logic -->
   <script>
     (function () {
       const theme = localStorage.getItem("theme") || "dark";
@@ -16,50 +20,76 @@
   </script>
 
   <style>
-    .builder-wrap { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); }
-    .builder-panel { padding: 16px; background: rgba(0,0,0,0.08); backdrop-filter: blur(6px); height: 100%; }
+    /* Minimal page-specific CSS so the 3D stage always shows */
+    .builder-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.75);
+    }
+
+    .builder-panel {
+      padding: 16px;
+      height: 100%;
+      background: rgba(255,255,255,0.85);
+    }
+
     .builder-panel h4 { margin: 14px 0 8px; font-size: 1.05rem; }
     .builder-panel label { display:block; margin:6px 0; cursor:pointer; user-select:none; }
 
     .stage-wrap {
       position: relative;
       min-height: 520px;
-      background: radial-gradient(ellipse at top, rgba(255,255,255,0.08), rgba(0,0,0,0.35));
+      background: radial-gradient(ellipse at top, rgba(0,0,0,0.06), rgba(0,0,0,0.18));
     }
-    #threeStage { width:100%; min-height:520px; }
+
+    /* IMPORTANT: if this height collapses, you won't see the canvas */
+    #threeStage {
+      width: 100%;
+      min-height: 520px;
+    }
 
     .stage-hint {
-      position:absolute; left:12px; bottom:12px;
-      font-size:12px; opacity:.85;
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(255,255,255,0.14);
-      padding: 8px 10px; border-radius: 10px; pointer-events:none;
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      font-size: 12px;
+      opacity: 0.85;
+      background: rgba(0,0,0,0.55);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 8px 10px;
+      border-radius: 10px;
+      pointer-events: none;
     }
 
     #burger-recipe-output {
       margin-top: 18px;
       padding: 14px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.10);
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.85);
     }
 
     #build-burger-button { margin-top: 14px; font-weight: 700; }
 
-    /* Visible error banner if images/scripts fail */
-    #builderError {
-      display:none;
-      margin-top: 12px;
-      padding: 12px;
+    /* Visible error box in the stage if image paths are wrong */
+    .stage-error {
+      padding: 16px;
+      color: #7a0012;
+      background: rgba(255, 0, 0, 0.08);
+      border: 1px solid rgba(255, 0, 0, 0.25);
       border-radius: 12px;
-      border: 1px solid rgba(255,0,0,0.35);
-      background: rgba(255,0,0,0.08);
+      margin: 12px;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
-  <header id="main-header"><h1>Ultimate Burger Guide</h1></header>
+  <header id="main-header">
+    <h1>Ultimate Burger Guide</h1>
+  </header>
 
   <nav>
     <a href="index.html">Home</a>
@@ -71,14 +101,21 @@
     <a href="about.html">About</a>
   </nav>
 
-  <main class="container">
+  <main class="container my-3">
     <div class="text-center my-4">
-      <h2>Interactive Burger Builder (Simple 3D)</h2>
-      <p class="mb-0">Pick ingredients on the left. The burger updates on the right using your existing layer images, stacked in 3D and auto-rotating.</p>
-      <small class="d-block mt-2" style="opacity:.75;">If you’re testing locally, use GitHub Pages (or VS Code Live Server) — file:// can break module loading.</small>
+      <h2>Interactive Burger Builder (3D)</h2>
+      <p class="mb-0">
+        Choose ingredients on the left. The burger updates in the 3D stage using your existing
+        <b>burger-layers</b> PNG files and auto-rotates.
+      </p>
+      <small class="d-block mt-2" style="opacity:.75;">
+        If testing locally, use GitHub Pages (or a local server like VS Code Live Server).
+        Opening via <b>file://</b> can break asset loading in some browsers.
+      </small>
     </div>
 
     <div class="builder-wrap row g-0">
+      <!-- LEFT: ingredient selection -->
       <div class="col-lg-5">
         <div id="burger-builder" class="builder-panel">
           <h4>1. Pick a Bun (Required)</h4>
@@ -103,13 +140,20 @@
 
           <button id="build-burger-button" class="btn btn-primary w-100">Build My Burger!</button>
 
-          <div id="builderError"></div>
+          <small class="d-block mt-3" style="opacity:.8;">
+            <b>Common GitHub Pages gotcha:</b> filenames and folders are case-sensitive.
+            Ensure the folder is named exactly <b>burger-layers</b> and files match exactly (e.g. <b>bun-bottom.png</b>).
+          </small>
         </div>
       </div>
 
+      <!-- RIGHT: 3D stage -->
       <div class="col-lg-7">
         <div class="stage-wrap">
-          <div id="threeStage"></div>
+          <div id="threeStage">
+            <!-- If JS runs, it will replace this content with a canvas -->
+            <div style="padding:16px;opacity:.8;">Loading 3D burger…</div>
+          </div>
           <div class="stage-hint">Auto-rotating • Drag = rotate • Scroll = zoom</div>
         </div>
       </div>
@@ -133,59 +177,74 @@
     </div>
   </main>
 
-  <footer><p>© 2025 Ultimate Burger Guide</p></footer>
+  <footer>
+    <p>© 2025 Ultimate Burger Guide</p>
+  </footer>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Google Translate: include a safe init so it doesn't break anything -->
-  <div id="google_translate_element" style="display:none;"></div>
+  <!-- Google Translate: safe init so it won't break your page -->
+  <div id="google_translate_element" style="display: none;"></div>
   <script>
     function googleTranslateElementInit() {
       try {
         new google.translate.TranslateElement({ pageLanguage: "en" }, "google_translate_element");
       } catch (e) {
-        // If translate fails, do nothing. We don't want it breaking the page.
+        // Do nothing if translate fails; don't let it break the builder.
       }
     }
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- 3D Builder -->
-  <script type="module">
-    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+  <!-- =========================================================
+       THREE.JS (NON-MODULE) — MOST COMPATIBLE ON GITHUB PAGES
+       ========================================================= -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
+  <script>
+    /**
+     * SIMPLE 3D BURGER BUILDER (using your existing PNG layers)
+     *
+     * How it works:
+     * - Each ingredient image is placed on a transparent PlaneGeometry (a flat 3D card).
+     * - We stack these planes upward (Y axis) like a burger.
+     * - The whole burger rotates automatically.
+     *
+     * Why this is "simple but accurate":
+     * - Uses your real art assets (burger-layers/*.png)
+     * - No WebGL modeling complexity
+     * - Looks 3D because it rotates in 3D space
+     */
+
+    // ---- DOM refs ----
     const stageEl = document.getElementById("threeStage");
-    const outputEl = document.getElementById("burger-recipe-output");
     const builderEl = document.getElementById("burger-builder");
     const buildBtn = document.getElementById("build-burger-button");
-    const errorEl = document.getElementById("builderError");
+    const outputEl = document.getElementById("burger-recipe-output");
 
-    function showError(msg) {
-      errorEl.style.display = "block";
-      errorEl.innerHTML =
-        "<b>Builder error:</b><br>" +
-        msg +
-        "<br><br><small>Common fix: check the folder name is exactly <b>burger-layers</b> and filenames match <b>case</b> (e.g., bun-bottom.png).</small>";
-    }
-
+    // ---- Read the user selections ----
     function getRadioValue(name) {
       const checked = document.querySelector(`input[name="${name}"]:checked`);
       return checked ? checked.value : null;
     }
+
     function getCheckedValues(name) {
       return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x => x.value);
     }
+
     function getConfig() {
       return {
-        bun: getRadioValue("bun"),
-        patty: getRadioValue("patty"),
-        cheese: getCheckedValues("cheese"),
-        topping: getCheckedValues("topping")
+        bun: getRadioValue("bun"),           // brioche | sesame | lettuce-wrap
+        patty: getRadioValue("patty"),       // beef | chicken | veggie
+        cheese: getCheckedValues("cheese"),  // array
+        topping: getCheckedValues("topping") // array
       };
     }
 
-    // Your existing PNG layer files (paths MUST match repo exactly)
+    // ---- Map your ingredient keys to EXACT image paths ----
+    // IMPORTANT: these must match your repo paths exactly (including case)
     const IMG = {
       bun_bottom: "burger-layers/bun-bottom.png",
       bun_top: "burger-layers/bun-top.png",
@@ -200,118 +259,182 @@
       cheese_cheddar: "burger-layers/cheese-cheddar.png",
       cheese_swiss: "burger-layers/cheese-swiss.png",
 
-      topping_onions: "burger-layers/topping-onions.png",
-      topping_tomato: "burger-layers/topping-tomato.png",
       topping_lettuce: "burger-layers/topping-lettuce.png",
+      topping_tomato: "burger-layers/topping-tomato.png",
+      topping_onions: "burger-layers/topping-onions.png",
     };
 
+    // ---- Convert selections to a stack order ----
     function configToStackKeys(cfg) {
       const stack = [];
+
+      // Bottom
       stack.push(cfg.bun === "lettuce-wrap" ? "wrap_bottom" : "bun_bottom");
+
+      // Patty
       stack.push(`patty_${cfg.patty}`);
 
+      // Cheese (if multiple checked, we stack them)
       for (const c of cfg.cheese) stack.push(`cheese_${c}`);
 
+      // Toppings in a stable order
       const toppingOrder = ["lettuce", "tomato", "onions"];
       for (const t of toppingOrder) {
         if (cfg.topping.includes(t)) stack.push(`topping_${t}`);
       }
 
+      // Top
       stack.push(cfg.bun === "lettuce-wrap" ? "wrap_top" : "bun_top");
+
       return stack;
     }
 
-    // --- Three.js setup ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0f14);
+    // ---- Error helper (shows inside the stage) ----
+    function showStageError(message) {
+      stageEl.innerHTML = `
+        <div class="stage-error">
+          <b>3D Builder Error</b><br/>
+          ${message}<br/><br/>
+          Check that:<br/>
+          • Folder is exactly <b>burger-layers</b><br/>
+          • Filenames match exact case (e.g. <b>bun-bottom.png</b>)<br/>
+        </div>`;
+    }
 
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    camera.position.set(0, 2.6, 6.0);
+    // ---- Build the Three.js scene ----
+    let scene, camera, renderer, controls, burgerGroup;
+    let texLoader;
+    const texCache = new Map();
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    stageEl.appendChild(renderer.domElement);
+    function initThree() {
+      // Clear loading text
+      stageEl.innerHTML = "";
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.target.set(0, 1.1, 0);
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0b0f14);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(30, 30),
-      new THREE.MeshStandardMaterial({ color: 0x0f1722, roughness: 1 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = 0;
-    scene.add(ground);
+      camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.set(0, 2.6, 6.0);
 
-    const burgerGroup = new THREE.Group();
-    burgerGroup.position.set(0, 0.2, 0);
-    burgerGroup.rotation.x = -0.08;
-    scene.add(burgerGroup);
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      stageEl.appendChild(renderer.domElement);
 
-    const loader = new THREE.TextureLoader();
-    const textureCache = new Map();
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.target.set(0, 1.1, 0);
 
+      // Lighting & ground (planes don't need light, but it helps the vibe)
+      scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(30, 30),
+        new THREE.MeshStandardMaterial({ color: 0x0f1722, roughness: 1 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = 0;
+      scene.add(ground);
+
+      burgerGroup = new THREE.Group();
+      burgerGroup.position.set(0, 0.2, 0);
+      burgerGroup.rotation.x = -0.08; // slight tilt for 3D feel
+      scene.add(burgerGroup);
+
+      texLoader = new THREE.TextureLoader();
+
+      // Ensure correct sizing
+      onResize();
+      window.addEventListener("resize", onResize);
+    }
+
+    function onResize() {
+      const w = stageEl.clientWidth;
+      const h = stageEl.clientHeight || 520;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    // ---- Load textures with caching ----
     function loadTexture(url) {
-      if (textureCache.has(url)) return Promise.resolve(textureCache.get(url));
+      if (texCache.has(url)) return Promise.resolve(texCache.get(url));
+
       return new Promise((resolve, reject) => {
-        loader.load(
+        texLoader.load(
           url,
           (t) => {
-            t.colorSpace = THREE.SRGBColorSpace;
-            textureCache.set(url, t);
+            texCache.set(url, t);
             resolve(t);
           },
           undefined,
-          () => reject(new Error("Could not load: " + url))
+          () => reject(new Error("Missing image: " + url))
         );
       });
     }
 
-    async function createLayerPlane(url) {
+    // ---- Make one 3D plane for a PNG layer ----
+    async function makeLayerPlane(url) {
       const tex = await loadTexture(url);
+
+      // Keep size constant for simplicity. You can tweak if you want.
       const geo = new THREE.PlaneGeometry(3.2, 3.2);
+
       const mat = new THREE.MeshBasicMaterial({
         map: tex,
         transparent: true,
-        depthWrite: false,
+        depthWrite: false,      // improves transparency stacking
         side: THREE.DoubleSide
       });
+
       return new THREE.Mesh(geo, mat);
     }
 
+    // ---- Rebuild the burger whenever selections change ----
     async function rebuildBurger() {
-      // Clear old
+      // Clear old layers
       while (burgerGroup.children.length) burgerGroup.remove(burgerGroup.children[0]);
 
       const cfg = getConfig();
-      const keys = configToStackKeys(cfg);
+      const stackKeys = configToStackKeys(cfg);
 
+      // Stack settings
       let y = 0.6;
       const gap = 0.18;
 
-      // If any image fails to load, we show a visible error banner.
-      try {
-        for (const key of keys) {
-          const url = IMG[key];
-          if (!url) continue;
+      for (const key of stackKeys) {
+        const url = IMG[key];
+        if (!url) continue;
 
-          const plane = await createLayerPlane(url);
-          plane.position.set(0, y, 0);
-          burgerGroup.add(plane);
-          y += gap;
-        }
+        const plane = await makeLayerPlane(url);
+        plane.position.set(0, y, 0);
 
-        // Hide error if successful
-        errorEl.style.display = "none";
-      } catch (e) {
-        showError(e.message);
+        // Slight random rotation reduces "perfectly flat" look (optional)
+        plane.rotation.y = (Math.random() - 0.5) * 0.04;
+
+        burgerGroup.add(plane);
+        y += gap;
       }
     }
 
-    builderEl.addEventListener("change", rebuildBurger);
+    // ---- Animation loop (auto-rotate) ----
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // auto rotation
+      burgerGroup.rotation.y += 0.005;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // ---- Hook controls ----
+    builderEl.addEventListener("change", () => {
+      rebuildBurger().catch(err => {
+        console.error(err);
+        showStageError(err.message);
+      });
+    });
 
     buildBtn.addEventListener("click", () => {
       const cfg = getConfig();
@@ -323,26 +446,22 @@
         `• Toppings: ${cfg.topping.length ? cfg.topping.join(", ") : "None"}`;
     });
 
-    function onResize() {
-      const w = stageEl.clientWidth;
-      const h = stageEl.clientHeight || 520;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
+    // ---- Boot everything safely ----
+    try {
+      if (!window.THREE) {
+        showStageError("Three.js failed to load. Check your internet connection or CDN access.");
+      } else {
+        initThree();
+        rebuildBurger().catch(err => {
+          console.error(err);
+          showStageError(err.message);
+        });
+        animate();
+      }
+    } catch (e) {
+      console.error(e);
+      showStageError("Unexpected error. Open DevTools Console for details.");
     }
-    window.addEventListener("resize", onResize);
-
-    function animate() {
-      requestAnimationFrame(animate);
-      burgerGroup.rotation.y += 0.005; // auto-rotate
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    // Boot
-    onResize();
-    rebuildBurger();
-    animate();
   </script>
 </body>
 </html>
