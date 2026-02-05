@@ -7,7 +7,6 @@
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Your site CSS -->
   <link rel="stylesheet" href="Style.css" />
 
   <script>
@@ -75,7 +74,6 @@
       background:rgba(255,255,255,0.96);
     }
     #build-burger-button { margin-top:14px; font-weight:700; }
-    code { background:rgba(0,0,0,0.06); padding:1px 6px; border-radius:6px; }
   </style>
 </head>
 
@@ -95,13 +93,10 @@
   <main class="container my-3">
     <div class="text-center my-4">
       <h2>Interactive Burger Builder (3D)</h2>
-      <p class="mb-0">
-        Choose ingredients on the left. Burger updates live and auto-rotates.
-      </p>
+      <p class="mb-0">Choose ingredients on the left. Burger updates live and auto-rotates.</p>
     </div>
 
     <div class="builder-wrap row g-0">
-      <!-- LEFT -->
       <div class="col-lg-5">
         <div id="burger-builder" class="builder-panel">
           <h4>1. Pick a Bun (Required)</h4>
@@ -130,7 +125,6 @@
         </div>
       </div>
 
-      <!-- RIGHT -->
       <div class="col-lg-7">
         <div class="stage-wrap">
           <div id="threeStage">
@@ -148,37 +142,13 @@
       <b>Your build summary will appear here.</b><br />
       Choose ingredients, then click “Build My Burger!”.
     </div>
-
-    <hr />
-
-    <h2 class="text-center">Our Favorite Recipe Video</h2>
-    <div class="video-container">
-      <iframe width="560" height="315"
-        src="https://www.youtube.com/embed/mwExFzKorws?si=Hy-q9s671xEPOBfs"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-      </iframe>
-    </div>
   </main>
 
   <footer><p>© 2025 Ultimate Burger Guide</p></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Google Translate (safe init) -->
-  <div id="google_translate_element" style="display:none;"></div>
-  <script>
-    function googleTranslateElementInit() {
-      try { new google.translate.TranslateElement({ pageLanguage: "en" }, "google_translate_element"); }
-      catch (e) {}
-    }
-  </script>
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-  <!-- ===========================
-       Summary script (ALWAYS works)
-       =========================== -->
+  <!-- Summary (always works) -->
   <script>
     window.addEventListener("DOMContentLoaded", () => {
       const buildBtn = document.getElementById("build-burger-button");
@@ -223,9 +193,11 @@
     });
   </script>
 
-  <!-- ===========================
-       Three.js + OrbitControls loader (robust)
-       =========================== -->
+  <!-- ✅ LOCAL ONLY: must exist in your repo -->
+  <script src="vendor/three/three.min.js"></script>
+  <script src="vendor/three/OrbitControls.js"></script>
+
+  <!-- 3D burger -->
   <script>
     (function () {
       const stageEl = document.getElementById("threeStage");
@@ -239,34 +211,78 @@
         stageEl.innerHTML = `<div class="stage-error">${html}</div>`;
       }
 
-      function loadScriptSequential(urls) {
-        return new Promise((resolve, reject) => {
-          let i = 0;
-          const tryNext = () => {
-            if (i >= urls.length) return reject(new Error("All sources failed:\n" + urls.join("\n")));
-            const url = urls[i++];
-            const s = document.createElement("script");
-            s.src = url;
-            s.async = true;
-            s.onload = () => resolve(url);
-            s.onerror = () => tryNext();
-            document.head.appendChild(s);
-          };
-          tryNext();
-        });
+      if (!window.THREE) {
+        setStatus(["3D failed", "Missing vendor/three/three.min.js"]);
+        showStageError("<b>Three.js did not load.</b><br>You must add <code>vendor/three/three.min.js</code> to your repo.");
+        return;
+      }
+      if (!THREE.OrbitControls) {
+        setStatus(["3D failed", "Missing vendor/three/OrbitControls.js"]);
+        showStageError("<b>OrbitControls did not load.</b><br>You must add <code>vendor/three/OrbitControls.js</code> to your repo.");
+        return;
       }
 
-      const THREE_URLS = [
-        "vendor/three/three.min.js",
-        "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
-        "https://unpkg.com/three@0.160.0/build/three.min.js"
-      ];
+      setStatus(["Three.js ✅", "Starting burger…"]);
+      stageEl.innerHTML = "";
 
-      const ORBIT_URLS = [
-        "vendor/three/OrbitControls.js",
-        "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js",
-        "https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"
-      ];
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x05070b);
+
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      camera.position.set(0, 3.1, 7.2);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      stageEl.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.target.set(0, 1.55, 0);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+      const key = new THREE.DirectionalLight(0xffffff, 1.0);
+      key.position.set(6, 10, 6);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xffffff, 0.35);
+      fill.position.set(-6, 3, -6);
+      scene.add(fill);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.25);
+      rim.position.set(0, 6, -10);
+      scene.add(rim);
+
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(40, 40),
+        new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = 0;
+      scene.add(ground);
+
+      const burgerGroup = new THREE.Group();
+      burgerGroup.position.set(0, 0.20, 0);
+      burgerGroup.rotation.x = -0.10;
+      scene.add(burgerGroup);
+
+      const MAT = {
+        bun: new THREE.MeshStandardMaterial({ color: 0xd7a56a, roughness: 0.85 }),
+        bunSesame: new THREE.MeshStandardMaterial({ color: 0xcf9658, roughness: 0.85 }),
+        wrap: new THREE.MeshStandardMaterial({ color: 0x32c46a, roughness: 0.9 }),
+
+        beef: new THREE.MeshStandardMaterial({ color: 0x2a1b14, roughness: 0.95 }),
+        chicken: new THREE.MeshStandardMaterial({ color: 0xd7a070, roughness: 0.85 }),
+        veggie: new THREE.MeshStandardMaterial({ color: 0x3a2a22, roughness: 0.92 }),
+
+        american: new THREE.MeshStandardMaterial({ color: 0xffd14a, roughness: 0.55 }),
+        cheddar: new THREE.MeshStandardMaterial({ color: 0xff9a2e, roughness: 0.55 }),
+        swiss: new THREE.MeshStandardMaterial({ color: 0xffefcf, roughness: 0.60 }),
+
+        lettuce: new THREE.MeshStandardMaterial({ color: 0x39da73, roughness: 0.9 }),
+        tomato: new THREE.MeshStandardMaterial({ color: 0xe24c4c, roughness: 0.75 }),
+        tomatoCore: new THREE.MeshStandardMaterial({ color: 0xffb3b3, roughness: 0.85 }),
+        onion: new THREE.MeshStandardMaterial({ color: 0xe6d2ff, roughness: 0.85 }),
+        seed: new THREE.MeshStandardMaterial({ color: 0xf1e6d6, roughness: 0.8 }),
+      };
 
       function getRadioValue(name) {
         const checked = document.querySelector(`input[name="${name}"]:checked`);
@@ -284,316 +300,193 @@
         };
       }
 
-      // ---- Realistic-ish burger shapes (no external textures) ----
-      function startRealisticShapes() {
-        setStatus([
-          "Using realistic shapes burger ✅",
-          "(No external model/textures)"
-        ]);
+      function makeBunHalf(material, isTop, radius = 1.65, height = 0.50) {
+        const g = new THREE.Group();
+        const sideH = height * 0.55;
+        g.add(new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.98, radius * 1.02, sideH, 64), material));
 
-        stageEl.innerHTML = "";
-
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x05070b);
-
-        const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-        camera.position.set(0, 3.1, 7.2);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        stageEl.appendChild(renderer.domElement);
-
-        let controls = null;
-        if (THREE.OrbitControls) {
-          controls = new THREE.OrbitControls(camera, renderer.domElement);
-          controls.enableDamping = true;
-          controls.enablePan = false;
-          controls.target.set(0, 1.55, 0);
-        }
-
-        scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-
-        const key = new THREE.DirectionalLight(0xffffff, 1.0);
-        key.position.set(6, 10, 6);
-        scene.add(key);
-
-        const fill = new THREE.DirectionalLight(0xffffff, 0.35);
-        fill.position.set(-6, 3, -6);
-        scene.add(fill);
-
-        const rim = new THREE.DirectionalLight(0xffffff, 0.25);
-        rim.position.set(0, 6, -10);
-        scene.add(rim);
-
-        const ground = new THREE.Mesh(
-          new THREE.PlaneGeometry(40, 40),
-          new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
+        const dome = new THREE.Mesh(
+          new THREE.SphereGeometry(radius * 0.98, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2),
+          material
         );
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = 0;
-        scene.add(ground);
 
-        const burgerGroup = new THREE.Group();
-        burgerGroup.position.set(0, 0.20, 0);
-        burgerGroup.rotation.x = -0.10;
-        scene.add(burgerGroup);
-
-        const MAT = {
-          bun: new THREE.MeshStandardMaterial({ color: 0xd7a56a, roughness: 0.85, metalness: 0.0 }),
-          bunSesame: new THREE.MeshStandardMaterial({ color: 0xcf9658, roughness: 0.85, metalness: 0.0 }),
-          wrap: new THREE.MeshStandardMaterial({ color: 0x32c46a, roughness: 0.9, metalness: 0.0 }),
-
-          beef: new THREE.MeshStandardMaterial({ color: 0x2a1b14, roughness: 0.95, metalness: 0.0 }),
-          chicken: new THREE.MeshStandardMaterial({ color: 0xd7a070, roughness: 0.85, metalness: 0.0 }),
-          veggie: new THREE.MeshStandardMaterial({ color: 0x3a2a22, roughness: 0.92, metalness: 0.0 }),
-
-          american: new THREE.MeshStandardMaterial({ color: 0xffd14a, roughness: 0.55, metalness: 0.0 }),
-          cheddar: new THREE.MeshStandardMaterial({ color: 0xff9a2e, roughness: 0.55, metalness: 0.0 }),
-          swiss: new THREE.MeshStandardMaterial({ color: 0xffefcf, roughness: 0.60, metalness: 0.0 }),
-
-          lettuce: new THREE.MeshStandardMaterial({ color: 0x39da73, roughness: 0.9, metalness: 0.0 }),
-          tomato: new THREE.MeshStandardMaterial({ color: 0xe24c4c, roughness: 0.75, metalness: 0.0 }),
-          tomatoCore: new THREE.MeshStandardMaterial({ color: 0xffb3b3, roughness: 0.85, metalness: 0.0 }),
-          onion: new THREE.MeshStandardMaterial({ color: 0xe6d2ff, roughness: 0.85, metalness: 0.0 }),
-          seed: new THREE.MeshStandardMaterial({ color: 0xf1e6d6, roughness: 0.8, metalness: 0.0 }),
-        };
-
-        function makeBunHalf(material, isTop, radius = 1.65, height = 0.50) {
-          const g = new THREE.Group();
-
-          const sideH = height * 0.55;
-          const side = new THREE.Mesh(
-            new THREE.CylinderGeometry(radius * 0.98, radius * 1.02, sideH, 64),
-            material
-          );
-          g.add(side);
-
-          const dome = new THREE.Mesh(
-            new THREE.SphereGeometry(radius * 0.98, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2),
-            material
-          );
-
-          if (isTop) {
-            dome.position.y = sideH / 2;
-            dome.rotation.x = Math.PI;
-            dome.position.y += radius * 0.50;
-          } else {
-            dome.scale.y = 0.55;
-            dome.position.y = sideH / 2 + radius * 0.20;
-          }
-
-          g.add(dome);
-          g.userData.h = sideH + radius * 0.55;
-          return g;
+        if (isTop) {
+          dome.position.y = sideH / 2;
+          dome.rotation.x = Math.PI;
+          dome.position.y += radius * 0.50;
+        } else {
+          dome.scale.y = 0.55;
+          dome.position.y = sideH / 2 + radius * 0.20;
         }
+        g.add(dome);
 
-        function makePatty(material) {
-          const m = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 0.30, 64), material);
-          m.scale.y = 0.95;
-          m.userData.h = 0.30;
-          return m;
-        }
-
-        function makeCheese(material) {
-          const g = new THREE.Group();
-          const base = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.06, 2.9), material);
-          base.rotation.y = Math.PI / 4;
-          g.add(base);
-
-          const dripGeo = new THREE.BoxGeometry(0.22, 0.18, 0.10);
-          const dripPositions = [
-            { x: 1.05, z: 0.90, ry: 0.5 },
-            { x: -1.10, z: 0.65, ry: -0.3 },
-            { x: 0.75, z: -1.05, ry: 1.0 },
-          ];
-          for (const p of dripPositions) {
-            const d = new THREE.Mesh(dripGeo, material);
-            d.position.set(p.x, -0.10, p.z);
-            d.rotation.y = p.ry;
-            g.add(d);
-          }
-
-          g.userData.h = 0.09;
-          return g;
-        }
-
-        function makeLettuce() {
-          const g = new THREE.Group();
-          const leaves = 18;
-          for (let i = 0; i < leaves; i++) {
-            const angle = (i / leaves) * Math.PI * 2;
-            const r = 1.35 + (Math.random() * 0.12);
-            const leaf = new THREE.Mesh(
-              new THREE.TorusGeometry(0.22 + Math.random() * 0.08, 0.05, 12, 24),
-              MAT.lettuce
-            );
-            leaf.position.set(Math.cos(angle) * r, 0, Math.sin(angle) * r);
-            leaf.rotation.set(Math.PI / 2, angle, (Math.random() - 0.5) * 0.6);
-            g.add(leaf);
-          }
-          g.userData.h = 0.18;
-          return g;
-        }
-
-        function makeTomato() {
-          const g = new THREE.Group();
-          const outer = new THREE.Mesh(new THREE.CylinderGeometry(1.30, 1.30, 0.12, 64), MAT.tomato);
-          const core = new THREE.Mesh(new THREE.CylinderGeometry(0.70, 0.70, 0.13, 48), MAT.tomatoCore);
-          core.position.y = 0.01;
-          g.add(outer);
-          g.add(core);
-          g.userData.h = 0.12;
-          return g;
-        }
-
-        function makeOnions() {
-          const g = new THREE.Group();
-          const rings = [
-            { r: 1.05, t: 0.05 },
-            { r: 0.88, t: 0.045 },
-            { r: 0.70, t: 0.040 },
-          ];
-          for (const rr of rings) {
-            const ring = new THREE.Mesh(new THREE.TorusGeometry(rr.r, rr.t, 16, 64), MAT.onion);
-            ring.rotation.x = Math.PI / 2;
-            ring.position.y = (Math.random() * 0.02);
-            g.add(ring);
-          }
-          g.userData.h = 0.10;
-          return g;
-        }
-
-        function addSesameSeeds(topBunGroup, count = 90) {
-          const seedGeo = new THREE.SphereGeometry(0.035, 12, 12);
-          const seeds = new THREE.InstancedMesh(seedGeo, MAT.seed, count);
-
-          const dummy = new THREE.Object3D();
-          for (let i = 0; i < count; i++) {
-            const a = Math.random() * Math.PI * 2;
-            const r = Math.sqrt(Math.random()) * 1.25;
-            const x = Math.cos(a) * r;
-            const z = Math.sin(a) * r;
-
-            dummy.position.set(x, 0.70, z);
-            dummy.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.6);
-            dummy.scale.set(1.0, 0.7, 1.3);
-            dummy.updateMatrix();
-            seeds.setMatrixAt(i, dummy.matrix);
-          }
-          seeds.instanceMatrix.needsUpdate = true;
-          topBunGroup.add(seeds);
-        }
-
-        function buildMeshes(cfg) {
-          const stack = [];
-
-          const bunMat =
-            (cfg.bun === "lettuce-wrap") ? MAT.wrap :
-            (cfg.bun === "sesame") ? MAT.bunSesame :
-            MAT.bun;
-
-          const bottom = makeBunHalf(bunMat, false, 1.65, 0.50);
-          stack.push(bottom);
-
-          const pattyMat =
-            (cfg.patty === "chicken") ? MAT.chicken :
-            (cfg.patty === "veggie") ? MAT.veggie :
-            MAT.beef;
-          stack.push(makePatty(pattyMat));
-
-          for (const c of cfg.cheese) {
-            const cm =
-              (c === "cheddar") ? MAT.cheddar :
-              (c === "swiss") ? MAT.swiss :
-              MAT.american;
-            stack.push(makeCheese(cm));
-          }
-
-          const order = ["lettuce", "tomato", "onions"];
-          for (const t of order) {
-            if (!cfg.topping.includes(t)) continue;
-            if (t === "lettuce") stack.push(makeLettuce());
-            if (t === "tomato") stack.push(makeTomato());
-            if (t === "onions") stack.push(makeOnions());
-          }
-
-          const top = makeBunHalf(bunMat, true, 1.70, 0.55);
-          if (cfg.bun === "sesame") addSesameSeeds(top, 90);
-          stack.push(top);
-
-          return stack;
-        }
-
-        function rebuild() {
-          while (burgerGroup.children.length) burgerGroup.remove(burgerGroup.children[0]);
-          const cfg = getConfig();
-          const stack = buildMeshes(cfg);
-
-          let y = 0.45;
-          for (let i = 0; i < stack.length; i++) {
-            const item = stack[i];
-            const h = item.userData.h || 0.20;
-
-            y += h / 2;
-            item.position.set(0, y, 0);
-            y += h / 2;
-
-            if (i !== 0 && i !== stack.length - 1) {
-              item.rotation.y += (Math.random() - 0.5) * 0.08;
-            }
-            burgerGroup.add(item);
-          }
-        }
-
-        function onResize() {
-          const rect = stageEl.getBoundingClientRect();
-          const w = Math.max(1, Math.floor(rect.width));
-          const h = Math.max(1, Math.floor(rect.height));
-          renderer.setSize(w, h, false);
-          camera.aspect = w / h;
-          camera.updateProjectionMatrix();
-        }
-        window.addEventListener("resize", onResize);
-        onResize();
-
-        builderEl.addEventListener("change", rebuild);
-        rebuild();
-
-        function animate() {
-          requestAnimationFrame(animate);
-          burgerGroup.rotation.y += 0.010;
-          if (controls) controls.update();
-          renderer.render(scene, camera);
-        }
-        animate();
+        g.userData.h = sideH + radius * 0.55;
+        return g;
       }
 
-      (async function boot() {
-        try {
-          setStatus(["Loading Three.js…"]);
-          const threeSrc = await loadScriptSequential(THREE_URLS);
+      function makePatty(material) {
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 0.30, 64), material);
+        m.scale.y = 0.95;
+        m.userData.h = 0.30;
+        return m;
+      }
 
-          setStatus(["Three.js ✅", "Loading OrbitControls…"]);
-          await loadScriptSequential(ORBIT_URLS);
+      function makeCheese(material) {
+        const g = new THREE.Group();
+        const base = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.06, 2.9), material);
+        base.rotation.y = Math.PI / 4;
+        g.add(base);
 
-          if (!window.THREE) {
-            showStageError("<b>Three.js failed.</b>");
-            setStatus(["Three.js ❌"]);
-            return;
-          }
-
-          // Start the realistic shapes burger (no GLTFLoader needed)
-          setStatus([
-            "Three.js ✅ (" + threeSrc + ")",
-            "Starting realistic burger…"
-          ]);
-          startRealisticShapes();
-        } catch (e) {
-          console.error(e);
-          setStatus(["3D failed"]);
-          showStageError("<b>3D failed to initialise.</b><br>Check your internet/CDN access.");
+        const dripGeo = new THREE.BoxGeometry(0.22, 0.18, 0.10);
+        const drips = [
+          { x: 1.05, z: 0.90, ry: 0.5 },
+          { x: -1.10, z: 0.65, ry: -0.3 },
+          { x: 0.75, z: -1.05, ry: 1.0 },
+        ];
+        for (const p of drips) {
+          const d = new THREE.Mesh(dripGeo, material);
+          d.position.set(p.x, -0.10, p.z);
+          d.rotation.y = p.ry;
+          g.add(d);
         }
-      })();
+        g.userData.h = 0.09;
+        return g;
+      }
+
+      function makeLettuce() {
+        const g = new THREE.Group();
+        const leaves = 18;
+        for (let i = 0; i < leaves; i++) {
+          const a = (i / leaves) * Math.PI * 2;
+          const r = 1.35 + (Math.random() * 0.12);
+          const leaf = new THREE.Mesh(
+            new THREE.TorusGeometry(0.22 + Math.random() * 0.08, 0.05, 12, 24),
+            MAT.lettuce
+          );
+          leaf.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+          leaf.rotation.set(Math.PI / 2, a, (Math.random() - 0.5) * 0.6);
+          g.add(leaf);
+        }
+        g.userData.h = 0.18;
+        return g;
+      }
+
+      function makeTomato() {
+        const g = new THREE.Group();
+        g.add(new THREE.Mesh(new THREE.CylinderGeometry(1.30, 1.30, 0.12, 64), MAT.tomato));
+        const core = new THREE.Mesh(new THREE.CylinderGeometry(0.70, 0.70, 0.13, 48), MAT.tomatoCore);
+        core.position.y = 0.01;
+        g.add(core);
+        g.userData.h = 0.12;
+        return g;
+      }
+
+      function makeOnions() {
+        const g = new THREE.Group();
+        const rings = [{ r: 1.05, t: 0.05 }, { r: 0.88, t: 0.045 }, { r: 0.70, t: 0.040 }];
+        for (const rr of rings) {
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(rr.r, rr.t, 16, 64), MAT.onion);
+          ring.rotation.x = Math.PI / 2;
+          ring.position.y = (Math.random() * 0.02);
+          g.add(ring);
+        }
+        g.userData.h = 0.10;
+        return g;
+      }
+
+      function addSesameSeeds(topBunGroup, count = 90) {
+        const seedGeo = new THREE.SphereGeometry(0.035, 12, 12);
+        const seeds = new THREE.InstancedMesh(seedGeo, MAT.seed, count);
+        const dummy = new THREE.Object3D();
+
+        for (let i = 0; i < count; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const r = Math.sqrt(Math.random()) * 1.25;
+          dummy.position.set(Math.cos(a) * r, 0.70, Math.sin(a) * r);
+          dummy.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.6);
+          dummy.scale.set(1.0, 0.7, 1.3);
+          dummy.updateMatrix();
+          seeds.setMatrixAt(i, dummy.matrix);
+        }
+        seeds.instanceMatrix.needsUpdate = true;
+        topBunGroup.add(seeds);
+      }
+
+      function buildMeshes(cfg) {
+        const stack = [];
+
+        const bunMat =
+          (cfg.bun === "lettuce-wrap") ? MAT.wrap :
+          (cfg.bun === "sesame") ? MAT.bunSesame :
+          MAT.bun;
+
+        stack.push(makeBunHalf(bunMat, false, 1.65, 0.50));
+
+        const pattyMat =
+          (cfg.patty === "chicken") ? MAT.chicken :
+          (cfg.patty === "veggie") ? MAT.veggie :
+          MAT.beef;
+        stack.push(makePatty(pattyMat));
+
+        for (const c of cfg.cheese) {
+          const cm = (c === "cheddar") ? MAT.cheddar : (c === "swiss") ? MAT.swiss : MAT.american;
+          stack.push(makeCheese(cm));
+        }
+
+        const order = ["lettuce", "tomato", "onions"];
+        for (const t of order) {
+          if (!cfg.topping.includes(t)) continue;
+          if (t === "lettuce") stack.push(makeLettuce());
+          if (t === "tomato") stack.push(makeTomato());
+          if (t === "onions") stack.push(makeOnions());
+        }
+
+        const top = makeBunHalf(bunMat, true, 1.70, 0.55);
+        if (cfg.bun === "sesame") addSesameSeeds(top, 90);
+        stack.push(top);
+
+        return stack;
+      }
+
+      function rebuild() {
+        while (burgerGroup.children.length) burgerGroup.remove(burgerGroup.children[0]);
+        const cfg = getConfig();
+        const stack = buildMeshes(cfg);
+
+        let y = 0.45;
+        for (let i = 0; i < stack.length; i++) {
+          const item = stack[i];
+          const h = item.userData.h || 0.20;
+          y += h / 2;
+          item.position.set(0, y, 0);
+          y += h / 2;
+          if (i !== 0 && i !== stack.length - 1) item.rotation.y += (Math.random() - 0.5) * 0.08;
+          burgerGroup.add(item);
+        }
+      }
+
+      function onResize() {
+        const rect = stageEl.getBoundingClientRect();
+        const w = Math.max(1, Math.floor(rect.width));
+        const h = Math.max(1, Math.floor(rect.height));
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener("resize", onResize);
+      onResize();
+
+      builderEl.addEventListener("change", rebuild);
+      rebuild();
+
+      setStatus(["Ready ✅", "Local vendor scripts loaded"]);
+      function animate() {
+        requestAnimationFrame(animate);
+        burgerGroup.rotation.y += 0.010;
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
     })();
   </script>
 </body>
