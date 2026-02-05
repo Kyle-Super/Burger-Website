@@ -5,9 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Your site CSS -->
   <link rel="stylesheet" href="Style.css" />
 
+  <!-- Theme preference -->
   <script>
     (function () {
       const theme = localStorage.getItem("theme") || "dark";
@@ -16,22 +20,75 @@
   </script>
 
   <style>
-    .builder-wrap{border-radius:16px;overflow:hidden;border:1px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.92)}
-    .builder-panel{padding:16px;height:100%;background:rgba(255,255,255,0.98)}
-    .builder-panel h4{margin:14px 0 8px;font-size:1.05rem}
-    .builder-panel label{display:block;margin:6px 0;cursor:pointer;user-select:none}
+    .builder-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.92);
+    }
+    .builder-panel {
+      padding: 16px;
+      height: 100%;
+      background: rgba(255,255,255,0.98);
+    }
+    .builder-panel h4 { margin: 14px 0 8px; font-size: 1.05rem; }
+    .builder-panel label { display:block; margin:6px 0; cursor:pointer; user-select:none; }
 
-    .stage-wrap{position:relative;height:560px;min-height:560px;width:100%;overflow:hidden;background:radial-gradient(ellipse at top, rgba(255,255,255,0.08), rgba(0,0,0,0.85))}
-    #threeStage{width:100%;height:100%}
-    #threeStage canvas{display:block;width:100% !important;height:100% !important}
+    .stage-wrap {
+      position: relative;
+      height: 560px;
+      min-height: 560px;
+      width: 100%;
+      overflow: hidden;
+      background: radial-gradient(ellipse at top, rgba(255,255,255,0.08), rgba(0,0,0,0.85));
+    }
+    #threeStage { width: 100%; height: 100%; }
+    #threeStage canvas { display:block; width:100% !important; height:100% !important; }
 
-    .stage-hint{position:absolute;left:12px;bottom:12px;font-size:12px;opacity:0.9;background:rgba(0,0,0,0.55);color:#fff;border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:10px;pointer-events:none}
-    .stage-badge{position:absolute;right:12px;top:12px;font-size:12px;opacity:0.9;background:rgba(0,0,0,0.55);color:#fff;border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:10px;pointer-events:none;max-width:70%;text-align:right}
-    .stage-error{padding:16px;color:#7a0012;background:rgba(255,0,0,0.10);border:1px solid rgba(255,0,0,0.25);border-radius:12px;margin:12px;font-size:14px;line-height:1.4}
+    .stage-hint {
+      position:absolute; left:12px; bottom:12px;
+      font-size:12px; opacity:0.9;
+      background: rgba(0,0,0,0.55);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.18);
+      padding:8px 10px;
+      border-radius:10px;
+      pointer-events:none;
+    }
+    .stage-badge {
+      position:absolute; right:12px; top:12px;
+      font-size:12px; opacity:0.9;
+      background: rgba(0,0,0,0.55);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.18);
+      padding:8px 10px;
+      border-radius:10px;
+      pointer-events:none;
+      max-width:70%;
+      text-align:right;
+      white-space: pre-line;
+    }
+    .stage-error {
+      padding: 16px;
+      color: #7a0012;
+      background: rgba(255, 0, 0, 0.10);
+      border: 1px solid rgba(255, 0, 0, 0.25);
+      border-radius: 12px;
+      margin: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
 
-    #burger-recipe-output{margin-top:18px;padding:14px;border-radius:14px;border:1px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.96)}
-    #build-burger-button{margin-top:14px;font-weight:700}
-    code{background:rgba(0,0,0,0.06);padding:1px 6px;border-radius:6px}
+    #burger-recipe-output {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.96);
+    }
+    #build-burger-button { margin-top: 14px; font-weight: 700; }
+
+    code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 6px; }
   </style>
 </head>
 
@@ -50,11 +107,14 @@
 
   <main class="container my-3">
     <div class="text-center my-4">
-      <h2>Interactive Burger Builder (3D Model)</h2>
-      <p class="mb-0">Loads <code>models/burger.glb</code> and toggles ingredients by mesh name.</p>
+      <h2>Interactive Burger Builder (3D)</h2>
+      <p class="mb-0">
+        Tries to load a real 3D model from <code>models/burger.glb</code>. If loaders are blocked, it falls back to a simple 3D burger so it still works.
+      </p>
     </div>
 
     <div class="builder-wrap row g-0">
+      <!-- LEFT -->
       <div class="col-lg-5">
         <div id="burger-builder" class="builder-panel">
           <h4>1. Pick a Bun (Required)</h4>
@@ -77,15 +137,18 @@
           <label><input type="checkbox" name="topping" value="tomato"> Fresh Tomato</label>
           <label><input type="checkbox" name="topping" value="onions"> Raw Onions</label>
 
-          <button id="build-burger-button" type="button" class="btn btn-primary w-100">Build My Burger!</button>
+          <button id="build-burger-button" type="button" class="btn btn-primary w-100">
+            Build My Burger!
+          </button>
         </div>
       </div>
 
+      <!-- RIGHT -->
       <div class="col-lg-7">
         <div class="stage-wrap">
           <div id="threeStage">
             <div class="stage-error" style="color:#fff;border-color:rgba(255,255,255,0.18);background:rgba(0,0,0,0.35);">
-              Loading 3D model…
+              Loading 3D…
             </div>
           </div>
           <div class="stage-hint">Auto-rotate • Drag to orbit • Scroll to zoom</div>
@@ -104,7 +167,19 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Summary works regardless of 3D -->
+  <!-- Google Translate (safe init) -->
+  <div id="google_translate_element" style="display:none;"></div>
+  <script>
+    function googleTranslateElementInit() {
+      try { new google.translate.TranslateElement({ pageLanguage: "en" }, "google_translate_element"); }
+      catch (e) {}
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <!-- ===========================
+       Summary script (ALWAYS works)
+       =========================== -->
   <script>
     window.addEventListener("DOMContentLoaded", () => {
       const buildBtn = document.getElementById("build-burger-button");
@@ -149,20 +224,60 @@
     });
   </script>
 
-  <!-- ✅ Local vendor scripts (no CDN blocks) -->
-  <script src="vendor/three/three.min.js"></script>
-  <script src="vendor/three/OrbitControls.js"></script>
-  <script src="vendor/three/GLTFLoader.js"></script>
-
+  <!-- ===========================
+       Robust loader: local -> jsdelivr -> unpkg
+       Then: try GLB model; else fallback to simple shapes burger
+       =========================== -->
   <script>
     (function () {
       const stageEl = document.getElementById("threeStage");
       const builderEl = document.getElementById("burger-builder");
       const stageStatus = document.getElementById("stageStatus");
 
-      function setStatus(t) { stageStatus.textContent = "Status: " + t; }
-      function showStageError(html) { stageEl.innerHTML = `<div class="stage-error">${html}</div>`; }
+      function setStatus(lines) {
+        stageStatus.textContent = Array.isArray(lines) ? ("Status:\n" + lines.join("\n")) : ("Status: " + lines);
+      }
+      function showStageError(html) {
+        stageEl.innerHTML = `<div class="stage-error">${html}</div>`;
+      }
 
+      function loadScriptSequential(urls) {
+        return new Promise((resolve, reject) => {
+          let i = 0;
+          const tryNext = () => {
+            if (i >= urls.length) return reject(new Error("All sources failed:\n" + urls.join("\n")));
+            const url = urls[i++];
+            const s = document.createElement("script");
+            s.src = url;
+            s.async = true;
+            s.onload = () => resolve(url);
+            s.onerror = () => tryNext();
+            document.head.appendChild(s);
+          };
+          tryNext();
+        });
+      }
+
+      // Try multiple sources so it "just works" in more environments
+      const THREE_URLS = [
+        "vendor/three/three.min.js",
+        "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+        "https://unpkg.com/three@0.160.0/build/three.min.js"
+      ];
+
+      const ORBIT_URLS = [
+        "vendor/three/OrbitControls.js",
+        "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js",
+        "https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"
+      ];
+
+      const GLTF_URLS = [
+        "vendor/three/GLTFLoader.js",
+        "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js",
+        "https://unpkg.com/three@0.160.0/examples/js/loaders/GLTFLoader.js"
+      ];
+
+      // --- Build config helpers used by BOTH model and fallback ---
       function getRadioValue(name) {
         const checked = document.querySelector(`input[name="${name}"]:checked`);
         return checked ? checked.value : null;
@@ -179,145 +294,366 @@
         };
       }
 
-      const MESH = {
-        bun: {
-          brioche: ["bun_brioche_top", "bun_brioche_bottom"],
-          sesame: ["bun_sesame_top", "bun_sesame_bottom"],
-          "lettuce-wrap": ["bun_wrap_top", "bun_wrap_bottom"],
-        },
-        patty: {
-          beef: ["patty_beef"],
-          chicken: ["patty_chicken"],
-          veggie: ["patty_veggie"],
-        },
-        cheese: {
-          american: ["cheese_american"],
-          cheddar: ["cheese_cheddar"],
-          swiss: ["cheese_swiss"],
-        },
-        topping: {
-          lettuce: ["topping_lettuce"],
-          tomato: ["topping_tomato"],
-          onions: ["topping_onions"],
+      // --- Fallback: simple 3D shapes burger (no loaders needed) ---
+      function startFallbackShapes() {
+        setStatus([
+          "GLB loader blocked/unavailable",
+          "Using fallback shapes burger ✅"
+        ]);
+
+        if (!window.THREE) {
+          showStageError("<b>Three.js is missing.</b><br>Even fallback can’t run.");
+          return;
         }
-      };
 
-      if (!window.THREE || !THREE.GLTFLoader) {
-        setStatus("Three/Loader missing");
-        showStageError("<b>Three.js or GLTFLoader is missing.</b><br>Make sure the vendor files exist under <code>vendor/three/</code>.");
-        return;
-      }
+        stageEl.innerHTML = "";
 
-      setStatus("Creating scene…");
-      stageEl.innerHTML = "";
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x05070b);
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x05070b);
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 3.2, 7.5);
 
-      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-      camera.position.set(0, 2.6, 6.5);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        stageEl.appendChild(renderer.domElement);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      stageEl.appendChild(renderer.domElement);
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-      const key = new THREE.DirectionalLight(0xffffff, 1.0);
-      key.position.set(6, 10, 6);
-      scene.add(key);
-      const fill = new THREE.DirectionalLight(0xffffff, 0.35);
-      fill.position.set(-6, 4, -6);
-      scene.add(fill);
-
-      const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(40, 40),
-        new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
-      );
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.y = 0;
-      scene.add(ground);
-
-      let controls = null;
-      if (THREE.OrbitControls) {
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.enablePan = false;
-        controls.target.set(0, 1.2, 0);
-      }
-
-      const modelRoot = new THREE.Group();
-      modelRoot.position.set(0, 0.2, 0);
-      scene.add(modelRoot);
-
-      function onResize() {
-        const rect = stageEl.getBoundingClientRect();
-        const w = Math.max(1, Math.floor(rect.width));
-        const h = Math.max(1, Math.floor(rect.height));
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      }
-      window.addEventListener("resize", onResize);
-      onResize();
-
-      const byName = new Map();
-      function indexModel(root) {
-        byName.clear();
-        root.traverse((obj) => { if (obj && obj.name) byName.set(obj.name, obj); });
-      }
-      function setVisible(names, visible) {
-        for (const n of names) {
-          const obj = byName.get(n);
-          if (obj) obj.visible = visible;
+        let controls = null;
+        if (THREE.OrbitControls) {
+          controls = new THREE.OrbitControls(camera, renderer.domElement);
+          controls.enableDamping = true;
+          controls.enablePan = false;
+          controls.target.set(0, 1.6, 0);
         }
-      }
-      function hideAllIngredients() {
-        for (const k in MESH.bun) setVisible(MESH.bun[k], false);
-        for (const k in MESH.patty) setVisible(MESH.patty[k], false);
-        for (const k in MESH.cheese) setVisible(MESH.cheese[k], false);
-        for (const k in MESH.topping) setVisible(MESH.topping[k], false);
-      }
-      function applySelectionToModel(cfg) {
-        if (!byName.size) return;
-        hideAllIngredients();
-        setVisible(MESH.bun[cfg.bun] || [], true);
-        setVisible(MESH.patty[cfg.patty] || [], true);
-        for (const c of cfg.cheese) setVisible(MESH.cheese[c] || [], true);
-        for (const t of cfg.topping) setVisible(MESH.topping[t] || [], true);
-      }
 
-      setStatus("Loading burger.glb…");
-      const loader = new THREE.GLTFLoader();
-      loader.load(
-        "models/burger.glb",
-        (gltf) => {
-          modelRoot.clear();
-          modelRoot.add(gltf.scene);
-          indexModel(gltf.scene);
-          applySelectionToModel(getConfig());
-          setStatus("Ready");
-          onResize();
-        },
-        undefined,
-        () => {
-          setStatus("Load failed");
-          showStageError(
-            `<b>Could not load <code>models/burger.glb</code></b><br>
-             Put the file at <code>/models/burger.glb</code> and commit it.<br>
-             Test by opening <code>.../models/burger.glb</code> directly in the browser.`
-          );
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const key = new THREE.DirectionalLight(0xffffff, 0.9);
+        key.position.set(6, 10, 6);
+        scene.add(key);
+
+        const ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(30, 30),
+          new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        scene.add(ground);
+
+        const burgerGroup = new THREE.Group();
+        burgerGroup.position.set(0, 0.25, 0);
+        burgerGroup.rotation.x = -0.10;
+        scene.add(burgerGroup);
+
+        const MAT = {
+          bun: new THREE.MeshStandardMaterial({ color: 0xd3a25f, roughness: 0.85 }),
+          bunSesame: new THREE.MeshStandardMaterial({ color: 0xc9934f, roughness: 0.85 }),
+          wrap: new THREE.MeshStandardMaterial({ color: 0x34c26a, roughness: 0.9 }),
+          beef: new THREE.MeshStandardMaterial({ color: 0x3b2418, roughness: 0.95 }),
+          chicken: new THREE.MeshStandardMaterial({ color: 0xd7a070, roughness: 0.85 }),
+          veggie: new THREE.MeshStandardMaterial({ color: 0x4a352c, roughness: 0.95 }),
+          american: new THREE.MeshStandardMaterial({ color: 0xffd24d, roughness: 0.55 }),
+          cheddar: new THREE.MeshStandardMaterial({ color: 0xff9a2e, roughness: 0.55 }),
+          swiss: new THREE.MeshStandardMaterial({ color: 0xffedc7, roughness: 0.6 }),
+          lettuce: new THREE.MeshStandardMaterial({ color: 0x39d66f, roughness: 0.9 }),
+          tomato: new THREE.MeshStandardMaterial({ color: 0xe04747, roughness: 0.7 }),
+          onion: new THREE.MeshStandardMaterial({ color: 0xdcc7f2, roughness: 0.8 })
+        };
+
+        function makeCyl(rTop, rBot, h, mat) {
+          const m = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBot, h, 48), mat);
+          m.userData.h = h;
+          return m;
         }
-      );
+        function makeCheese(mat) {
+          const m = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.06, 2.7), mat);
+          m.rotation.y = Math.PI / 4;
+          m.userData.h = 0.06;
+          return m;
+        }
+        function makeOnion() {
+          const m = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.06, 16, 64), MAT.onion);
+          m.rotation.x = Math.PI / 2;
+          m.userData.h = 0.10;
+          return m;
+        }
 
-      builderEl.addEventListener("change", () => applySelectionToModel(getConfig()));
+        function buildStack(cfg) {
+          const stack = [];
 
-      function animate() {
-        requestAnimationFrame(animate);
-        modelRoot.rotation.y += 0.008;
-        if (controls) controls.update();
-        renderer.render(scene, camera);
+          // bottom bun
+          if (cfg.bun === "lettuce-wrap") stack.push(makeCyl(1.55, 1.65, 0.45, MAT.wrap));
+          else if (cfg.bun === "sesame") stack.push(makeCyl(1.55, 1.65, 0.45, MAT.bunSesame));
+          else stack.push(makeCyl(1.55, 1.65, 0.45, MAT.bun));
+
+          // patty
+          if (cfg.patty === "chicken") stack.push(makeCyl(1.45, 1.45, 0.28, MAT.chicken));
+          else if (cfg.patty === "veggie") stack.push(makeCyl(1.45, 1.45, 0.28, MAT.veggie));
+          else stack.push(makeCyl(1.45, 1.45, 0.28, MAT.beef));
+
+          // cheeses
+          for (const c of cfg.cheese) {
+            if (c === "cheddar") stack.push(makeCheese(MAT.cheddar));
+            else if (c === "swiss") stack.push(makeCheese(MAT.swiss));
+            else stack.push(makeCheese(MAT.american));
+          }
+
+          // toppings
+          const order = ["lettuce", "tomato", "onions"];
+          for (const t of order) {
+            if (!cfg.topping.includes(t)) continue;
+            if (t === "lettuce") stack.push(makeCyl(1.55, 1.55, 0.14, MAT.lettuce));
+            if (t === "tomato") stack.push(makeCyl(1.35, 1.35, 0.10, MAT.tomato));
+            if (t === "onions") stack.push(makeOnion());
+          }
+
+          // top bun
+          if (cfg.bun === "lettuce-wrap") stack.push(makeCyl(1.62, 1.52, 0.55, MAT.wrap));
+          else if (cfg.bun === "sesame") stack.push(makeCyl(1.62, 1.52, 0.55, MAT.bunSesame));
+          else stack.push(makeCyl(1.62, 1.52, 0.55, MAT.bun));
+
+          return stack;
+        }
+
+        function rebuild() {
+          while (burgerGroup.children.length) burgerGroup.remove(burgerGroup.children[0]);
+          const cfg = getConfig();
+          const meshes = buildStack(cfg);
+
+          let y = 0.55;
+          for (const m of meshes) {
+            const h = m.userData.h || 0.2;
+            y += h / 2;
+            m.position.set(0, y, 0);
+            y += h / 2;
+            burgerGroup.add(m);
+          }
+        }
+
+        function onResize() {
+          const rect = stageEl.getBoundingClientRect();
+          const w = Math.max(1, Math.floor(rect.width));
+          const h = Math.max(1, Math.floor(rect.height));
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        window.addEventListener("resize", onResize);
+        onResize();
+
+        builderEl.addEventListener("change", rebuild);
+        rebuild();
+
+        function animate() {
+          requestAnimationFrame(animate);
+          burgerGroup.rotation.y += 0.01;
+          if (controls) controls.update();
+          renderer.render(scene, camera);
+        }
+        animate();
       }
-      animate();
+
+      // --- Primary: try GLB model if possible ---
+      function startGLBViewer() {
+        setStatus([
+          "Three ✅",
+          "OrbitControls ✅",
+          "GLTFLoader ✅",
+          "Loading models/burger.glb…"
+        ]);
+
+        stageEl.innerHTML = "";
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x05070b);
+
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 2.6, 6.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        stageEl.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+        const key = new THREE.DirectionalLight(0xffffff, 1.0);
+        key.position.set(6, 10, 6);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0xffffff, 0.35);
+        fill.position.set(-6, 4, -6);
+        scene.add(fill);
+
+        const ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(40, 40),
+          new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        scene.add(ground);
+
+        let controls = null;
+        if (THREE.OrbitControls) {
+          controls = new THREE.OrbitControls(camera, renderer.domElement);
+          controls.enableDamping = true;
+          controls.enablePan = false;
+          controls.target.set(0, 1.2, 0);
+        }
+
+        const modelRoot = new THREE.Group();
+        modelRoot.position.set(0, 0.2, 0);
+        scene.add(modelRoot);
+
+        function onResize() {
+          const rect = stageEl.getBoundingClientRect();
+          const w = Math.max(1, Math.floor(rect.width));
+          const h = Math.max(1, Math.floor(rect.height));
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        window.addEventListener("resize", onResize);
+        onResize();
+
+        // Mesh mapping (you may need to rename meshes in the GLB to match these)
+        const MESH = {
+          bun: {
+            brioche: ["bun_brioche_top", "bun_brioche_bottom"],
+            sesame: ["bun_sesame_top", "bun_sesame_bottom"],
+            "lettuce-wrap": ["bun_wrap_top", "bun_wrap_bottom"],
+          },
+          patty: {
+            beef: ["patty_beef"],
+            chicken: ["patty_chicken"],
+            veggie: ["patty_veggie"],
+          },
+          cheese: {
+            american: ["cheese_american"],
+            cheddar: ["cheese_cheddar"],
+            swiss: ["cheese_swiss"],
+          },
+          topping: {
+            lettuce: ["topping_lettuce"],
+            tomato: ["topping_tomato"],
+            onions: ["topping_onions"],
+          }
+        };
+
+        const byName = new Map();
+        function indexModel(root) {
+          byName.clear();
+          root.traverse((obj) => { if (obj && obj.name) byName.set(obj.name, obj); });
+        }
+        function setVisible(names, visible) {
+          for (const n of names) {
+            const obj = byName.get(n);
+            if (obj) obj.visible = visible;
+          }
+        }
+        function hideAllIngredients() {
+          for (const k in MESH.bun) setVisible(MESH.bun[k], false);
+          for (const k in MESH.patty) setVisible(MESH.patty[k], false);
+          for (const k in MESH.cheese) setVisible(MESH.cheese[k], false);
+          for (const k in MESH.topping) setVisible(MESH.topping[k], false);
+        }
+        function applySelectionToModel(cfg) {
+          if (!byName.size) return;
+          hideAllIngredients();
+          setVisible(MESH.bun[cfg.bun] || [], true);
+          setVisible(MESH.patty[cfg.patty] || [], true);
+          for (const c of cfg.cheese) setVisible(MESH.cheese[c] || [], true);
+          for (const t of cfg.topping) setVisible(MESH.topping[t] || [], true);
+        }
+
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+          "models/burger.glb",
+          (gltf) => {
+            modelRoot.clear();
+            modelRoot.add(gltf.scene);
+
+            indexModel(gltf.scene);
+            applySelectionToModel(getConfig());
+
+            setStatus([
+              "Three ✅",
+              "OrbitControls ✅",
+              "GLTFLoader ✅",
+              "Model ✅ (Ready)"
+            ]);
+
+            builderEl.addEventListener("change", () => applySelectionToModel(getConfig()));
+            onResize();
+          },
+          undefined,
+          (err) => {
+            console.error(err);
+            setStatus([
+              "Three ✅",
+              "OrbitControls ✅",
+              "GLTFLoader ✅",
+              "Model ❌"
+            ]);
+            showStageError(
+              `<b>Could not load <code>models/burger.glb</code></b><br>
+               Put the file in your repo at <code>/models/burger.glb</code> (case-sensitive).<br>
+               You can test it by opening <code>.../models/burger.glb</code> directly in the browser.`
+            );
+          }
+        );
+
+        function animate() {
+          requestAnimationFrame(animate);
+          modelRoot.rotation.y += 0.008;
+          if (controls) controls.update();
+          renderer.render(scene, camera);
+        }
+        animate();
+      }
+
+      // --- Boot sequence with robust loading + fallback ---
+      (async function boot() {
+        try {
+          setStatus(["Loading Three.js…"]);
+          const threeSrc = await loadScriptSequential(THREE_URLS);
+
+          setStatus(["Three.js loaded ✅", "Loading OrbitControls…"]);
+          const orbitSrc = await loadScriptSequential(ORBIT_URLS);
+
+          setStatus(["Three.js ✅", "OrbitControls loaded ✅", "Loading GLTFLoader…"]);
+          let gltfSrc = null;
+          try {
+            gltfSrc = await loadScriptSequential(GLTF_URLS);
+          } catch (e) {
+            // GLTFLoader failed everywhere -> fallback
+            console.warn(e);
+            setStatus([
+              "Three.js ✅ (" + threeSrc + ")",
+              "OrbitControls ✅ (" + orbitSrc + ")",
+              "GLTFLoader ❌ (blocked/missing)",
+              "Falling back…"
+            ]);
+            startFallbackShapes();
+            return;
+          }
+
+          // If GLTFLoader exists, try real model
+          if (window.THREE && THREE.GLTFLoader) {
+            setStatus([
+              "Three.js ✅",
+              "OrbitControls ✅",
+              "GLTFLoader ✅ (" + gltfSrc + ")",
+              "Starting model…"
+            ]);
+            startGLBViewer();
+          } else {
+            // Shouldn't happen, but fallback safely
+            setStatus(["Loader not available at runtime", "Falling back…"]);
+            startFallbackShapes();
+          }
+        } catch (e) {
+          console.error(e);
+          setStatus(["3D failed", "Falling back…"]);
+          startFallbackShapes();
+        }
+      })();
     })();
   </script>
 </body>
