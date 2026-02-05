@@ -26,13 +26,11 @@
       border: 1px solid rgba(0,0,0,0.12);
       background: rgba(255,255,255,0.92);
     }
-
     .builder-panel {
       padding: 16px;
       height: 100%;
       background: rgba(255,255,255,0.98);
     }
-
     .builder-panel h4 { margin: 14px 0 8px; font-size: 1.05rem; }
     .builder-panel label { display:block; margin:6px 0; cursor:pointer; user-select:none; }
 
@@ -45,20 +43,12 @@
       overflow: hidden;
       background: radial-gradient(ellipse at top, rgba(255,255,255,0.08), rgba(0,0,0,0.85));
     }
-
     #threeStage { width: 100%; height: 100%; }
-    #threeStage canvas {
-      display:block;
-      width:100% !important;
-      height:100% !important;
-    }
+    #threeStage canvas { display:block; width:100% !important; height:100% !important; }
 
     .stage-hint {
-      position:absolute;
-      left:12px;
-      bottom:12px;
-      font-size:12px;
-      opacity:0.9;
+      position:absolute; left:12px; bottom:12px;
+      font-size:12px; opacity:0.9;
       background: rgba(0,0,0,0.55);
       color:#fff;
       border:1px solid rgba(255,255,255,0.18);
@@ -68,11 +58,8 @@
     }
 
     .stage-badge {
-      position:absolute;
-      right:12px;
-      top:12px;
-      font-size:12px;
-      opacity:0.9;
+      position:absolute; right:12px; top:12px;
+      font-size:12px; opacity:0.9;
       background: rgba(0,0,0,0.55);
       color:#fff;
       border:1px solid rgba(255,255,255,0.18);
@@ -81,6 +68,17 @@
       pointer-events:none;
       max-width:70%;
       text-align:right;
+    }
+
+    .stage-error {
+      padding: 16px;
+      color: #7a0012;
+      background: rgba(255, 0, 0, 0.10);
+      border: 1px solid rgba(255, 0, 0, 0.25);
+      border-radius: 12px;
+      margin: 12px;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
     #burger-recipe-output {
@@ -92,6 +90,8 @@
     }
 
     #build-burger-button { margin-top: 14px; font-weight: 700; }
+
+    code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 6px; }
   </style>
 </head>
 
@@ -112,9 +112,9 @@
 
   <main class="container my-3">
     <div class="text-center my-4">
-      <h2>Interactive Burger Builder (3D)</h2>
+      <h2>Interactive Burger Builder (3D Model)</h2>
       <p class="mb-0">
-        Pick ingredients on the left. The burger updates live using simple 3D shapes and auto-rotates.
+        This version uses a real 3D model (<code>models/burger.glb</code>) and toggles ingredients by mesh name.
       </p>
     </div>
 
@@ -145,14 +145,19 @@
           <button id="build-burger-button" type="button" class="btn btn-primary w-100">
             Build My Burger!
           </button>
+
         </div>
       </div>
 
       <!-- RIGHT -->
       <div class="col-lg-7">
         <div class="stage-wrap">
-          <div id="threeStage"></div>
-          <div class="stage-hint">Auto-rotate • Drag (optional)</div>
+          <div id="threeStage">
+            <div class="stage-error" style="color:#fff;border-color:rgba(255,255,255,0.18);background:rgba(0,0,0,0.35);">
+              Loading 3D model…
+            </div>
+          </div>
+          <div class="stage-hint">Auto-rotate • Drag to orbit • Scroll to zoom</div>
           <div class="stage-badge" id="stageStatus">Status: Initializing…</div>
         </div>
       </div>
@@ -187,20 +192,20 @@
   <div id="google_translate_element" style="display:none;"></div>
   <script>
     function googleTranslateElementInit() {
-      try {
-        new google.translate.TranslateElement({ pageLanguage: "en" }, "google_translate_element");
-      } catch (e) {}
+      try { new google.translate.TranslateElement({ pageLanguage: "en" }, "google_translate_element"); }
+      catch (e) {}
     }
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- Three.js (non-module = most compatible) -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Three.js (module build for GLTFLoader) -->
+  <script type="module">
+    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+    import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
 
-  <script>
     // ----------------------------
-    // Helpers: read form selections
+    // DOM + form helpers
     // ----------------------------
     const stageEl = document.getElementById("threeStage");
     const builderEl = document.getElementById("burger-builder");
@@ -226,7 +231,6 @@
       };
     }
 
-    // Friendly labels for the summary
     const LABEL = {
       bun: { brioche: "Brioche Bun", sesame: "Sesame Seed Bun", "lettuce-wrap": "Lettuce Wrap" },
       patty: { beef: "Beef Patty", chicken: "Grilled Chicken", veggie: "Veggie Patty" },
@@ -235,187 +239,80 @@
     };
 
     // ----------------------------
-    // Three.js: simple shape burger
+    // IMPORTANT: mesh-name mapping
+    // If your GLB uses different names, change them here.
     // ----------------------------
-    if (!window.THREE) {
-      setStatus("Three.js failed");
-      stageEl.innerHTML = "<div style='padding:16px;color:#fff'>Three.js failed to load.</div>";
-      throw new Error("THREE missing");
-    }
+    const MESH = {
+      bun: {
+        brioche: ["bun_brioche_top", "bun_brioche_bottom"],
+        sesame: ["bun_sesame_top", "bun_sesame_bottom"],
+        "lettuce-wrap": ["bun_wrap_top", "bun_wrap_bottom"],
+      },
+      patty: {
+        beef: ["patty_beef"],
+        chicken: ["patty_chicken"],
+        veggie: ["patty_veggie"],
+      },
+      cheese: {
+        american: ["cheese_american"],
+        cheddar: ["cheese_cheddar"],
+        swiss: ["cheese_swiss"],
+      },
+      topping: {
+        lettuce: ["topping_lettuce"],
+        tomato: ["topping_tomato"],
+        onions: ["topping_onions"],
+      }
+    };
 
+    // ----------------------------
+    // Scene setup
+    // ----------------------------
     setStatus("Creating scene…");
+    stageEl.innerHTML = "";
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x05070b);
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.set(0, 3.2, 7.5);
+    camera.position.set(0, 2.6, 6.5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     stageEl.appendChild(renderer.domElement);
 
-    // Controls are optional; if they fail, the burger still works.
-    let controls = null;
-    if (THREE.OrbitControls) {
-      controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.enablePan = false;
-      controls.target.set(0, 1.6, 0);
-    }
+    // Lights for “product render” feel
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-    // Lighting (makes it look more 3D than PNG planes)
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const key = new THREE.DirectionalLight(0xffffff, 0.9);
+    const key = new THREE.DirectionalLight(0xffffff, 1.0);
     key.position.set(6, 10, 6);
     scene.add(key);
+
     const fill = new THREE.DirectionalLight(0xffffff, 0.35);
     fill.position.set(-6, 4, -6);
     scene.add(fill);
 
     // Ground
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(30, 30),
+      new THREE.PlaneGeometry(40, 40),
       new THREE.MeshStandardMaterial({ color: 0x070a10, roughness: 1 })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = 0;
     scene.add(ground);
 
-    // Burger container
-    const burgerGroup = new THREE.Group();
-    burgerGroup.position.set(0, 0.25, 0);
-    burgerGroup.rotation.x = -0.10;
-    scene.add(burgerGroup);
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.target.set(0, 1.2, 0);
 
-    // Materials (simple but nice)
-    const MAT = {
-      bun: new THREE.MeshStandardMaterial({ color: 0xd3a25f, roughness: 0.85 }),
-      bunSesame: new THREE.MeshStandardMaterial({ color: 0xc9934f, roughness: 0.85 }),
-      wrap: new THREE.MeshStandardMaterial({ color: 0x34c26a, roughness: 0.9 }),
-      beef: new THREE.MeshStandardMaterial({ color: 0x3b2418, roughness: 0.95 }),
-      chicken: new THREE.MeshStandardMaterial({ color: 0xd7a070, roughness: 0.85 }),
-      veggie: new THREE.MeshStandardMaterial({ color: 0x4a352c, roughness: 0.95 }),
-      cheeseAmerican: new THREE.MeshStandardMaterial({ color: 0xffd24d, roughness: 0.55 }),
-      cheeseCheddar: new THREE.MeshStandardMaterial({ color: 0xff9a2e, roughness: 0.55 }),
-      cheeseSwiss: new THREE.MeshStandardMaterial({ color: 0xffedc7, roughness: 0.6 }),
-      lettuce: new THREE.MeshStandardMaterial({ color: 0x39d66f, roughness: 0.9 }),
-      tomato: new THREE.MeshStandardMaterial({ color: 0xe04747, roughness: 0.7 }),
-      onion: new THREE.MeshStandardMaterial({ color: 0xdcc7f2, roughness: 0.8 })
-    };
+    // Model root
+    const modelRoot = new THREE.Group();
+    modelRoot.position.set(0, 0.2, 0);
+    scene.add(modelRoot);
 
-    // Create a "layer mesh" for each ingredient
-    function makeBunBottom(material) {
-      const geo = new THREE.CylinderGeometry(1.55, 1.65, 0.45, 48);
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.userData.h = 0.45;
-      return mesh;
-    }
-    function makeBunTop(material) {
-      const geo = new THREE.CylinderGeometry(1.62, 1.52, 0.55, 48);
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.userData.h = 0.55;
-      return mesh;
-    }
-    function makePatty(material) {
-      const geo = new THREE.CylinderGeometry(1.45, 1.45, 0.28, 48);
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.userData.h = 0.28;
-      return mesh;
-    }
-    function makeCheese(material) {
-      const geo = new THREE.BoxGeometry(2.7, 0.06, 2.7);
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.rotation.y = Math.PI / 4;
-      mesh.userData.h = 0.06;
-      return mesh;
-    }
-    function makeLettuce() {
-      const geo = new THREE.CylinderGeometry(1.55, 1.55, 0.14, 48);
-      const mesh = new THREE.Mesh(geo, MAT.lettuce);
-      mesh.userData.h = 0.14;
-      return mesh;
-    }
-    function makeTomato() {
-      const geo = new THREE.CylinderGeometry(1.35, 1.35, 0.10, 48);
-      const mesh = new THREE.Mesh(geo, MAT.tomato);
-      mesh.userData.h = 0.10;
-      return mesh;
-    }
-    function makeOnion() {
-      const geo = new THREE.TorusGeometry(1.05, 0.06, 16, 64);
-      const mesh = new THREE.Mesh(geo, MAT.onion);
-      mesh.rotation.x = Math.PI / 2;
-      mesh.userData.h = 0.10;
-      return mesh;
-    }
-
-    // Build stack from config
-    function configToMeshes(cfg) {
-      const stack = [];
-
-      // bun selection affects material + optional wrap
-      if (cfg.bun === "lettuce-wrap") {
-        stack.push(makeBunBottom(MAT.wrap));
-      } else if (cfg.bun === "sesame") {
-        stack.push(makeBunBottom(MAT.bunSesame));
-      } else {
-        stack.push(makeBunBottom(MAT.bun));
-      }
-
-      // patty
-      if (cfg.patty === "chicken") stack.push(makePatty(MAT.chicken));
-      else if (cfg.patty === "veggie") stack.push(makePatty(MAT.veggie));
-      else stack.push(makePatty(MAT.beef));
-
-      // cheeses (can stack multiple)
-      for (const c of cfg.cheese) {
-        if (c === "cheddar") stack.push(makeCheese(MAT.cheeseCheddar));
-        else if (c === "swiss") stack.push(makeCheese(MAT.cheeseSwiss));
-        else stack.push(makeCheese(MAT.cheeseAmerican));
-      }
-
-      // toppings in stable order
-      const order = ["lettuce", "tomato", "onions"];
-      for (const t of order) {
-        if (!cfg.topping.includes(t)) continue;
-        if (t === "lettuce") stack.push(makeLettuce());
-        if (t === "tomato") stack.push(makeTomato());
-        if (t === "onions") stack.push(makeOnion());
-      }
-
-      // top bun/wrap
-      if (cfg.bun === "lettuce-wrap") {
-        stack.push(makeBunTop(MAT.wrap));
-      } else if (cfg.bun === "sesame") {
-        stack.push(makeBunTop(MAT.bunSesame));
-      } else {
-        stack.push(makeBunTop(MAT.bun));
-      }
-
-      return stack;
-    }
-
-    // Rebuild burger
-    function rebuildBurger() {
-      while (burgerGroup.children.length) burgerGroup.remove(burgerGroup.children[0]);
-
-      const cfg = getConfig();
-      const meshes = configToMeshes(cfg);
-
-      let y = 0.55;
-      for (const m of meshes) {
-        const h = m.userData.h || 0.2;
-        y += h / 2;
-        m.position.set(0, y, 0);
-        y += h / 2;
-        burgerGroup.add(m);
-      }
-
-      setStatus("Ready");
-    }
-
-    // Size
+    // Resize
     function onResize() {
       const rect = stageEl.getBoundingClientRect();
       const w = Math.max(1, Math.floor(rect.width));
@@ -425,15 +322,125 @@
       camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", onResize);
-    onResize();
 
-    // Live updates
-    builderEl.addEventListener("change", rebuildBurger);
+    // ----------------------------
+    // Load GLB + build lookup table
+    // ----------------------------
+    const loader = new GLTFLoader();
 
-    // Summary button
+    // Mesh lookup: name -> object3D
+    const byName = new Map();
+
+    function indexModel(object3D) {
+      byName.clear();
+      object3D.traverse((obj) => {
+        if (obj && obj.name) byName.set(obj.name, obj);
+      });
+    }
+
+    function setVisible(names, visible) {
+      for (const n of names) {
+        const obj = byName.get(n);
+        if (obj) obj.visible = visible;
+      }
+    }
+
+    // Hide everything ingredient-related first (so we can turn on what we need)
+    function hideAllIngredients() {
+      // buns
+      for (const k of Object.keys(MESH.bun)) setVisible(MESH.bun[k], false);
+      // patties
+      for (const k of Object.keys(MESH.patty)) setVisible(MESH.patty[k], false);
+      // cheeses
+      for (const k of Object.keys(MESH.cheese)) setVisible(MESH.cheese[k], false);
+      // toppings
+      for (const k of Object.keys(MESH.topping)) setVisible(MESH.topping[k], false);
+    }
+
+    function applySelectionToModel(cfg) {
+      // buns/patty: one-of
+      hideAllIngredients();
+
+      // show chosen bun + patty
+      setVisible(MESH.bun[cfg.bun] || [], true);
+      setVisible(MESH.patty[cfg.patty] || [], true);
+
+      // cheese/toppings: many-of
+      for (const c of cfg.cheese) setVisible(MESH.cheese[c] || [], true);
+      for (const t of cfg.topping) setVisible(MESH.topping[t] || [], true);
+    }
+
+    // Helpful error if mesh names don’t match
+    function missingMeshReport() {
+      const missing = [];
+      const allGroups = [MESH.bun, MESH.patty, MESH.cheese, MESH.topping];
+      for (const group of allGroups) {
+        for (const key of Object.keys(group)) {
+          for (const name of group[key]) {
+            if (!byName.has(name)) missing.push(name);
+          }
+        }
+      }
+      return missing;
+    }
+
+    setStatus("Loading burger.glb…");
+    loader.load(
+      "models/burger.glb",
+      (gltf) => {
+        setStatus("Model loaded");
+        modelRoot.clear();
+        modelRoot.add(gltf.scene);
+
+        // Index meshes by name
+        indexModel(gltf.scene);
+
+        // Optional: scale/center if your model is huge/off-center
+        // You can tweak this if needed.
+        // modelRoot.scale.setScalar(1.0);
+
+        // Validate mesh names
+        const missing = missingMeshReport();
+        if (missing.length) {
+          // Don’t fail; just warn visibly.
+          setStatus("Mesh names mismatch");
+          console.warn("Missing meshes:", missing);
+        } else {
+          setStatus("Ready");
+        }
+
+        // Apply default selection
+        applySelectionToModel(getConfig());
+
+        // Resize after model is in DOM
+        onResize();
+      },
+      undefined,
+      (err) => {
+        console.error(err);
+        setStatus("Load failed");
+        stageEl.innerHTML = `
+          <div class="stage-error">
+            <b>Could not load <code>models/burger.glb</code></b><br>
+            Make sure the file exists in your repo at <code>/models/burger.glb</code> and is committed/pushed.<br><br>
+            If you renamed the folder/file, update the path in this code.
+          </div>`;
+      }
+    );
+
+    // ----------------------------
+    // Live updates (toggle meshes)
+    // ----------------------------
+    builderEl.addEventListener("change", () => {
+      const cfg = getConfig();
+      applySelectionToModel(cfg);
+    });
+
+    // ----------------------------
+    // Summary button (works)
+    // ----------------------------
     buildBtn.addEventListener("click", (e) => {
       e.preventDefault();
-
       const cfg = getConfig();
 
       const bunText = LABEL.bun[cfg.bun] || cfg.bun || "—";
@@ -449,20 +456,19 @@
         `• Toppings: ${toppingText}`;
     });
 
-    // Animate
+    // ----------------------------
+    // Animate (auto-rotate model root)
+    // ----------------------------
     function animate() {
       requestAnimationFrame(animate);
 
-      burgerGroup.rotation.y += 0.01; // auto-rotate speed
-      if (controls) controls.update();
+      modelRoot.rotation.y += 0.008; // auto-rotate
+      controls.update();
       renderer.render(scene, camera);
     }
 
-    // Boot
-    rebuildBurger();
+    onResize();
     animate();
   </script>
 </body>
 </html>
-
-
