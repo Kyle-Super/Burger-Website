@@ -1,137 +1,497 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Make Your Own Burger</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="Style.css">
-    
-    <script>
-        (function() {
-            const theme = localStorage.getItem('theme') || 'dark';
-            if (theme === 'light') {
-                document.documentElement.className = 'light-mode';
-            }
-        })();
-    </script>
+  <title>Make Your Own Burger | Ultimate Burger Guide</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  
+  <link rel="stylesheet" href="Style.css" />
+
+  <!-- Keep  theme preference logic -->
+  <script>
+    (function () {
+      const theme = localStorage.getItem("theme") || "dark";
+      if (theme === "light") document.documentElement.className = "light-mode";
+    })();
+  </script>
+
+  <style>
+    /* Keep styling simple + compatible with your existing Style.css */
+    .builder-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .builder-panel {
+      padding: 16px;
+      height: 100%;
+      background: rgba(0,0,0,0.08);
+      backdrop-filter: blur(6px);
+    }
+    .builder-panel h4 { margin: 14px 0 8px; font-size: 1.05rem; }
+    .builder-panel label { display: block; margin: 6px 0; cursor: pointer; user-select: none; }
+
+    .stage-wrap {
+      position: relative;
+      min-height: 520px;
+      background: radial-gradient(ellipse at top, rgba(255,255,255,0.08), rgba(0,0,0,0.35));
+    }
+    #threeStage { width: 100%; height: 100%; min-height: 520px; }
+
+    .stage-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      font-size: 12px;
+      opacity: 0.8;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.14);
+      padding: 8px 10px;
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    #burger-recipe-output {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.10);
+    }
+    #build-burger-button { margin-top: 14px; font-weight: 700; }
+  </style>
 </head>
+
 <body>
-    <header id="main-header">
-        <h1>Ultimate Burger Guide</h1>
-    </header>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="city_burgers.html">Best Burgers by City</a>
-        <a href="recipe_cards.html">Recipe Cards</a>
-        <a href="make_your_own.html">Make Your Own</a>
-        <a href="burger_battles.html">Burger Battles</a>
-        <a href="submit.html">Submit Your Pick</a>
-        <a href="about.html">About</a>
-    </nav>
-    <main class="container">
-        <div class="text-center">
-            <h2>Interactive Burger Builder</h2>
-            <p>Select your ingredients from the panel on the left and watch your creation come to life on the right! When you're done, hit "Build My Burger" for a summary.</p>
+  <header id="main-header">
+    <h1>Ultimate Burger Guide</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="city_burgers.html">Best Burgers by City</a>
+    <a href="recipe_cards.html">Recipe Cards</a>
+    <a href="make_your_own.html">Make Your Own</a>
+    <a href="burger_battles.html">Burger Battles</a>
+    <a href="submit.html">Submit Your Pick</a>
+    <a href="about.html">About</a>
+  </nav>
+
+  <main class="container">
+    <div class="text-center my-4">
+      <h2>Interactive Burger Builder (Simple 3D)</h2>
+      <p class="mb-0">
+        Pick ingredients on the left. The burger updates on the right using your <b>existing layer images</b>,
+        stacked in 3D and auto-rotating.
+      </p>
+      <small class="d-block mt-2" style="opacity:.75;">
+        This is intentionally simple: 2D PNG layers placed as 3D “cards” in a rotating stack.
+      </small>
+    </div>
+
+    <div class="builder-wrap row g-0">
+      <!-- LEFT: Ingredient controls -->
+      <div class="col-lg-5">
+        <div id="burger-builder" class="builder-panel">
+          <h4>1. Pick a Bun (Required)</h4>
+          <label><input type="radio" name="bun" value="brioche" checked> Brioche Bun</label>
+          <label><input type="radio" name="bun" value="sesame"> Sesame Seed Bun</label>
+          <label><input type="radio" name="bun" value="lettuce-wrap"> Lettuce Wrap</label>
+
+          <h4>2. Pick a Patty (Required)</h4>
+          <label><input type="radio" name="patty" value="beef" checked> Beef Patty</label>
+          <label><input type="radio" name="patty" value="chicken"> Grilled Chicken</label>
+          <label><input type="radio" name="patty" value="veggie"> Veggie Patty</label>
+
+          <h4>3. Add Cheese (Optional)</h4>
+          <label><input type="checkbox" name="cheese" value="american"> American Cheese</label>
+          <label><input type="checkbox" name="cheese" value="cheddar"> Sharp Cheddar</label>
+          <label><input type="checkbox" name="cheese" value="swiss"> Swiss Cheese</label>
+
+          <h4>4. Add Toppings (Optional)</h4>
+          <label><input type="checkbox" name="topping" value="lettuce"> Crisp Lettuce</label>
+          <label><input type="checkbox" name="topping" value="tomato"> Fresh Tomato</label>
+          <label><input type="checkbox" name="topping" value="onions"> Raw Onions</label>
+
+          <button id="build-burger-button" class="btn btn-primary w-100">Build My Burger!</button>
+
+          <small class="d-block mt-3" style="opacity:.85;">
+            Tip: If something doesn’t show on GitHub Pages, it’s usually a <b>path/casing</b> issue.
+            These image paths must match your filenames exactly.
+          </small>
         </div>
-        
-        <div class="simulation-wrapper row align-items-center g-4">
-            <!-- Left Column: Ingredient Controls -->
-            <div id="burger-builder" class="burger-controls col-lg-5">
-                
-                <h4>1. Pick a Bun (Required)</h4>
-                <label><input type="radio" name="bun" value="brioche" checked> Brioche Bun</label>
-                <label><input type="radio" name="bun" value="sesame"> Sesame Seed Bun</label>
-                <label><input type="radio" name="bun" value="lettuce-wrap"> Lettuce Wrap</label>
-            
-                <h4>2. Pick a Patty (Required)</h4>
-                <label><input type="radio" name="patty" value="beef" checked> Beef Patty</label>
-                <label><input type="radio" name="patty" value="chicken"> Grilled Chicken</label>
-                <label><input type="radio" name="patty" value="veggie"> Veggie Patty</label>
-                
-                <h4>3. Add Cheese (Optional)</h4>
-                <label><input type="checkbox" name="cheese" value="american"> American Cheese</label>
-                <label><input type="checkbox" name="cheese" value="cheddar"> Sharp Cheddar</label>
-                <label><input type="checkbox" name="cheese" value="swiss"> Swiss Cheese</label>
+      </div>
 
-                <h4>4. Add Toppings (Optional)</h4>
-                <label><input type="checkbox" name="topping" value="lettuce"> Crisp Lettuce</label>
-                <label><input type="checkbox" name="topping" value="tomato"> Fresh Tomato</label>
-                <label><input type="checkbox" name="topping" value="onions"> Raw Onions</label>
-
-                <button id="build-burger-button" class="btn btn-primary w-100">Build My Burger!</button>
-            </div>
-
-            <!-- Right Column: Burger Visual Stage -->
-            <div class="burger-stage col-lg-7">
-                <img id="layer-bun-bottom" src="burger-layers/bun-bottom.png" alt="">
-                <img id="layer-lettuce-wrap-bottom" src="burger-layers/lettuce-wrap-bottom.png" alt="">
-                
-                <img id="layer-beef" src="burger-layers/patty-beef.png" alt="">
-                <img id="layer-chicken" src="burger-layers/patty-chicken.png" alt="">
-                <img id="layer-veggie" src="burger-layers/patty-veggie.png" alt="">
-                
-                <img id="layer-american" src="burger-layers/cheese-american.png" alt="">
-                <img id="layer-cheddar" src="burger-layers/cheese-cheddar.png" alt="">
-                <img id="layer-swiss" src="burger-layers/cheese-swiss.png" alt="">
-                
-                <img id="layer-onions" src="burger-layers/topping-onions.png" alt="">
-                <img id="layer-tomato" src="burger-layers/topping-tomato.png" alt="">
-                <img id="layer-lettuce" src="burger-layers/topping-lettuce.png" alt="">
-                
-                <img id="layer-bun-top" src="burger-layers/bun-top.png" alt="">
-                <img id="layer-lettuce-wrap-top" src="burger-layers/lettuce-wrap-top.png" alt="">
-            </div>
+      <!-- RIGHT: 3D Stage -->
+      <div class="col-lg-7">
+        <div class="stage-wrap">
+          <div id="threeStage"></div>
+          <div class="stage-hint">Auto-rotating • Drag = rotate • Scroll = zoom</div>
         </div>
+      </div>
+    </div>
 
-        <div id="burger-recipe-output" aria-live="polite">
-            <!-- The text recipe summary will be generated here -->
-        </div>
+    <div id="burger-recipe-output" aria-live="polite">
+      <b>Your build summary will appear here.</b><br />
+      Choose ingredients, then click “Build My Burger!”.
+    </div>
 
-        <hr>
+    <hr />
 
-        <h2 class="text-center">Our Favorite Recipe Video</h2>
-        <div class="video-container">
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/mwExFzKorws?si=Hy-q9s671xEPOBfs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        </div>
-    </main>
-    <footer>
-        <p>© 2025 Ultimate Burger Guide</p>
-    </footer>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="Scripts.js"></script>
-    
-    <div id="google_translate_element" style="display: none;"></div>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <h2 class="text-center">Our Favorite Recipe Video</h2>
+    <div class="video-container">
+      <iframe width="560" height="315"
+        src="https://www.youtube.com/embed/mwExFzKorws?si=Hy-q9s671xEPOBfs"
+        title="YouTube video player" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+      </iframe>
+    </div>
+  </main>
 
-    <script>
-        function initializeTranslation() {
-            const checkTranslate = setInterval(() => {
-                const select = document.querySelector('select.goog-te-combo');
-                if (select) {
-                    clearInterval(checkTranslate);
-                    const savedLang = localStorage.getItem('userLanguage') || 'en';
-                    changeLanguage(savedLang);
-                }
-            }, 100);
+  <footer>
+    <p>© 2025 Ultimate Burger Guide</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Google Translate (kept from your original) -->
+  <div id="google_translate_element" style="display: none;"></div>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script>
+    function initializeTranslation() {
+      const checkTranslate = setInterval(() => {
+        const select = document.querySelector("select.goog-te-combo");
+        if (select) {
+          clearInterval(checkTranslate);
+          const savedLang = localStorage.getItem("userLanguage") || "en";
+          changeLanguage(savedLang);
         }
+      }, 100);
+    }
+    document.addEventListener("DOMContentLoaded", initializeTranslation);
 
-        document.addEventListener('DOMContentLoaded', initializeTranslation);
-
-        function changeLanguage(lang) {
-            if (window.google && window.google.translate) {
-                const select = document.querySelector('select.goog-te-combo');
-                if (select) {
-                    select.value = lang;
-                    select.dispatchEvent(new Event('change'));
-                }
-            }
+    function changeLanguage(lang) {
+      if (window.google && window.google.translate) {
+        const select = document.querySelector("select.goog-te-combo");
+        if (select) {
+          select.value = lang;
+          select.dispatchEvent(new Event("change"));
         }
-    </script>
+      }
+    }
+  </script>
+
+  <!-- =========================================================
+       SIMPLE "3D" BUILDER USING YOUR EXISTING PNG LAYERS
+       - Loads burger-layers/*.png
+       - Stacks them as transparent planes in 3D
+       - Auto-rotates the burger
+       ========================================================= -->
+  <script type="module">
+    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+    // -----------------------------
+    // DOM references
+    // -----------------------------
+    const stageEl = document.getElementById("threeStage");
+    const outputEl = document.getElementById("burger-recipe-output");
+    const builderEl = document.getElementById("burger-builder");
+    const buildBtn = document.getElementById("build-burger-button");
+
+    // -----------------------------
+    // Utility: read form selections
+    // -----------------------------
+    function getRadioValue(name) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.value : null;
+    }
+    function getCheckedValues(name) {
+      return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x => x.value);
+    }
+
+    function getConfig() {
+      return {
+        bun: getRadioValue("bun"),          // brioche | sesame | lettuce-wrap
+        patty: getRadioValue("patty"),      // beef | chicken | veggie
+        cheese: getCheckedValues("cheese"), // array
+        topping: getCheckedValues("topping")// array
+      };
+    }
+
+    // -----------------------------
+    // Map selections -> YOUR image files
+    // (must match your repo paths exactly)
+    // -----------------------------
+    const IMG = {
+      bun_bottom: "burger-layers/bun-bottom.png",
+      bun_top: "burger-layers/bun-top.png",
+      wrap_bottom: "burger-layers/lettuce-wrap-bottom.png",
+      wrap_top: "burger-layers/lettuce-wrap-top.png",
+
+      patty_beef: "burger-layers/patty-beef.png",
+      patty_chicken: "burger-layers/patty-chicken.png",
+      patty_veggie: "burger-layers/patty-veggie.png",
+
+      cheese_american: "burger-layers/cheese-american.png",
+      cheese_cheddar: "burger-layers/cheese-cheddar.png",
+      cheese_swiss: "burger-layers/cheese-swiss.png",
+
+      topping_onions: "burger-layers/topping-onions.png",
+      topping_tomato: "burger-layers/topping-tomato.png",
+      topping_lettuce: "burger-layers/topping-lettuce.png",
+    };
+
+    /**
+     * Convert selections into an ordered "stack" of layer keys.
+     * This is the simplest “state → render” approach.
+     */
+    function configToStackKeys(cfg) {
+      const stack = [];
+
+      // Bottom
+      stack.push(cfg.bun === "lettuce-wrap" ? "wrap_bottom" : "bun_bottom");
+
+      // Patty
+      stack.push(`patty_${cfg.patty}`);
+
+      // Cheese (keep it simple: if multiple cheeses checked, stack them)
+      for (const c of cfg.cheese) stack.push(`cheese_${c}`);
+
+      // Toppings (consistent order so it doesn't jump around)
+      const toppingOrder = ["lettuce", "tomato", "onions"];
+      for (const t of toppingOrder) {
+        if (cfg.topping.includes(t)) stack.push(`topping_${t}`);
+      }
+
+      // Top
+      stack.push(cfg.bun === "lettuce-wrap" ? "wrap_top" : "bun_top");
+
+      return stack;
+    }
+
+    // -----------------------------
+    // Three.js setup
+    // -----------------------------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b0f14);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+    camera.position.set(0, 2.6, 6.0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    stageEl.appendChild(renderer.domElement);
+
+    // Controls are optional, but helpful. Auto-rotate still runs.
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.target.set(0, 1.1, 0);
+
+    // Simple lighting (planes use MeshBasicMaterial so they don't need light,
+    // but lights help the ground + overall “3D feel”)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+    const d = new THREE.DirectionalLight(0xffffff, 0.6);
+    d.position.set(5, 8, 5);
+    scene.add(d);
+
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 30),
+      new THREE.MeshStandardMaterial({ color: 0x0f1722, roughness: 1 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = 0;
+    scene.add(ground);
+
+    // The burger group holds the stacked image-planes
+    const burgerGroup = new THREE.Group();
+    burgerGroup.position.set(0, 0.2, 0);
+    burgerGroup.rotation.x = -0.08; // slight tilt so it feels 3D
+    scene.add(burgerGroup);
+
+    // Texture loader for your PNGs
+    const loader = new THREE.TextureLoader();
+
+    // Cache textures so we don't reload the same file repeatedly
+    const textureCache = new Map();
+
+    async function loadTexture(url) {
+      if (textureCache.has(url)) return textureCache.get(url);
+
+      const tex = await new Promise((resolve, reject) => {
+        loader.load(
+          url,
+          (t) => resolve(t),
+          undefined,
+          (err) => reject(err)
+        );
+      });
+
+      // Important for crisp transparent PNGs
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      textureCache.set(url, tex);
+      return tex;
+    }
+
+    /**
+     * Create one plane mesh for a layer image.
+     * We keep it simple: all layers share a consistent width/height.
+     */
+    async function createLayerPlane(url) {
+      const tex = await loadTexture(url);
+
+      // A consistent card size works well for burger layers (simple + reliable).
+      // If you want more accuracy later, you can adjust based on image aspect ratio.
+      const width = 3.2;
+      const height = 3.2;
+
+      const geo = new THREE.PlaneGeometry(width, height);
+
+      // MeshBasicMaterial shows the texture "as is" (no lighting needed), supports transparency.
+      const mat = new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        depthWrite: false,  // helps prevent weird transparency overlap
+        side: THREE.DoubleSide
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+
+      // Face the camera-ish (we rotate the whole burger group anyway)
+      mesh.rotation.x = 0;
+
+      return mesh;
+    }
+
+    /**
+     * Rebuild burger stack in 3D:
+     * - Clear old planes
+     * - Create planes for each selected layer image
+     * - Stack them with a small Y spacing
+     */
+    async function rebuildBurger() {
+      // Clear existing meshes
+      while (burgerGroup.children.length) burgerGroup.remove(burgerGroup.children[0]);
+
+      const cfg = getConfig();
+      const keys = configToStackKeys(cfg);
+
+      // Vertical spacing between layers (tweak if you want “taller” burgers)
+      const layerGap = 0.18;
+
+      // Start stacking from bottom up
+      let y = 0.6;
+
+      // Build each layer
+      for (const key of keys) {
+        const url = IMG[key];
+
+        // If a path is wrong, fail gracefully (helps debugging on GitHub Pages)
+        if (!url) continue;
+
+        try {
+          const plane = await createLayerPlane(url);
+
+          // Put each plane at increasing height
+          plane.position.set(0, y, 0);
+
+          // Tiny random rotation helps reduce "perfectly flat" look
+          plane.rotation.y = (Math.random() - 0.5) * 0.05;
+
+          burgerGroup.add(plane);
+          y += layerGap;
+        } catch (e) {
+          // If an image fails to load (wrong path/case), log it to console.
+          console.warn("Failed to load layer:", key, url, e);
+        }
+      }
+    }
+
+    // Live update when user changes any option
+    builderEl.addEventListener("change", () => {
+      rebuildBurger();
+    });
+
+    // Build summary text (kept simple and readable)
+    buildBtn.addEventListener("click", () => {
+      const cfg = getConfig();
+
+      const bunName = {
+        "brioche": "Brioche Bun",
+        "sesame": "Sesame Seed Bun",
+        "lettuce-wrap": "Lettuce Wrap"
+      }[cfg.bun] || cfg.bun;
+
+      const pattyName = {
+        "beef": "Beef Patty",
+        "chicken": "Grilled Chicken",
+        "veggie": "Veggie Patty"
+      }[cfg.patty] || cfg.patty;
+
+      const cheeseName = {
+        "american": "American Cheese",
+        "cheddar": "Sharp Cheddar",
+        "swiss": "Swiss Cheese"
+      };
+
+      const toppingName = {
+        "lettuce": "Crisp Lettuce",
+        "tomato": "Fresh Tomato",
+        "onions": "Raw Onions"
+      };
+
+      const cheeses = cfg.cheese.map(c => cheeseName[c] || c);
+      const tops = cfg.topping.map(t => toppingName[t] || t);
+
+      outputEl.innerHTML =
+        `<b>Your Burger Build:</b><br>` +
+        `• Bun: ${bunName}<br>` +
+        `• Patty: ${pattyName}<br>` +
+        `• Cheese: ${cheeses.length ? cheeses.join(", ") : "None"}<br>` +
+        `• Toppings: ${tops.length ? tops.join(", ") : "None"}`;
+    });
+
+    // Handle sizing
+    function onResize() {
+      const w = stageEl.clientWidth;
+      const h = stageEl.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", onResize);
+
+    // Animation loop:
+    // - auto-rotate burger
+    // - allow user controls too
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Auto rotate (simple + looks good)
+      burgerGroup.rotation.y += 0.005;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Boot
+    onResize();
+    await rebuildBurger();
+    animate();
+  </script>
 </body>
 </html>
+```
+
+
 
 
